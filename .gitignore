@@ -2,3 +2,4 @@
 *.eps
 *.json
 *.table
+__pycache__/
