@@ -1,27 +1,27 @@
 <!--
 This xml file created automatically on: 
-2024-6-30
+2024-7-4
 -->
 <!DOCTYPE Channel  SYSTEM 'HistFactorySchema.dtd'>  
 
   <Channel Name="channel_4j2b_SR" InputFile="" >
 
-    <Data HistoName="4j2b_pseudodatatemp_rebin_clone" InputFile="data/temp_histos.root" HistoPath=""  /> 
+    <Data HistoName="4j2b_pseudodata" InputFile="data/histograms.root" HistoPath=""  /> 
 
-    <StatErrorConfig RelErrorThreshold="0.001" ConstraintType="Gaussian" /> 
+    <StatErrorConfig RelErrorThreshold="0.01" ConstraintType="Gaussian" /> 
 
-    <Sample Name="ttbar"  HistoPath=""  HistoName="4j2b_ttbartemp_rebin_clone"  InputFile="data/temp_histos.root"  NormalizeByTheory="True" >
+    <Sample Name="ttbar"  HistoPath=""  HistoName="4j2b_ttbar"  InputFile="data/histograms.root"  NormalizeByTheory="True" >
       <StatError Activate="True"  InputFile=""  HistoName=""  HistoPath=""  /> 
       <OverallSys Name="Lumi"  High="1.03"  Low="0.97"   /> 
-      <OverallSys Name="ME_variation"  High="1.15833"  Low="0.841672"   /> 
-      <OverallSys Name="PS_variation"  High="0.948035"  Low="1.05196"   /> 
-      <OverallSys Name="tt_scale_var"  High="1.05518"  Low="0.917737"   /> 
-      <OverallSys Name="jet_energy_scale"  High="1.04828"  Low="0.951723"   /> 
-      <OverallSys Name="jet_energy_res"  High="0.997312"  Low="1.00269"   /> 
-      <OverallSys Name="b_tag_NP_1"  High="1.20058"  Low="0.799417"   /> 
-      <OverallSys Name="b_tag_NP_2"  High="1.13691"  Low="0.863086"   /> 
-      <OverallSys Name="b_tag_NP_3"  High="1.09754"  Low="0.902458"   /> 
-      <OverallSys Name="b_tag_NP_4"  High="1.07206"  Low="0.927937"   /> 
+      <OverallSys Name="ME_variation"  High="1.16194"  Low="0.83806"   /> 
+      <OverallSys Name="PS_variation"  High="0.971355"  Low="1.02865"   /> 
+      <OverallSys Name="tt_scale_var"  High="1.05174"  Low="0.918542"   /> 
+      <OverallSys Name="jet_energy_scale"  High="1.0454"  Low="0.954603"   /> 
+      <OverallSys Name="jet_energy_res"  High="0.996788"  Low="1.00321"   /> 
+      <OverallSys Name="b_tag_NP_1"  High="1.19705"  Low="0.80295"   /> 
+      <OverallSys Name="b_tag_NP_2"  High="1.13473"  Low="0.865269"   /> 
+      <OverallSys Name="b_tag_NP_3"  High="1.09623"  Low="0.903768"   /> 
+      <OverallSys Name="b_tag_NP_4"  High="1.07139"  Low="0.928614"   /> 
       <NormFactor Name="ttbar_norm"  Val="1"  High="10"  Low="0"   /> 
       <HistoSys Name="ME_variation"  HistoFileLow="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameLow="4j2b_ttbar_ME_variation_norm_plus_shape_down"  HistoPathLow=""  HistoFileHigh="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameHigh="4j2b_ttbar_ME_variation_norm_plus_shape_up"  HistoPathHigh=""   /> 
       <HistoSys Name="PS_variation"  HistoFileLow="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameLow="4j2b_ttbar_PS_variation_norm_plus_shape_down"  HistoPathLow=""  HistoFileHigh="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameHigh="4j2b_ttbar_PS_variation_norm_plus_shape_up"  HistoPathHigh=""   /> 
@@ -35,15 +35,15 @@ This xml file created automatically on:
     </Sample>
 
 
-    <Sample Name="wjets"  HistoPath=""  HistoName="4j2b_wjetstemp_rebin_clone"  InputFile="data/temp_histos.root"  NormalizeByTheory="True" >
+    <Sample Name="wjets"  HistoPath=""  HistoName="4j2b_wjets"  InputFile="data/histograms.root"  NormalizeByTheory="True" >
       <StatError Activate="True"  InputFile=""  HistoName=""  HistoPath=""  /> 
       <OverallSys Name="Lumi"  High="1.03"  Low="0.97"   /> 
-      <OverallSys Name="jet_energy_scale"  High="1.09677"  Low="0.903226"   /> 
-      <OverallSys Name="jet_energy_res"  High="1.05376"  Low="0.946237"   /> 
-      <OverallSys Name="b_tag_NP_1"  High="1.25126"  Low="0.748737"   /> 
-      <OverallSys Name="b_tag_NP_2"  High="1.16103"  Low="0.838967"   /> 
-      <OverallSys Name="b_tag_NP_3"  High="1.09536"  Low="0.904641"   /> 
-      <OverallSys Name="b_tag_NP_4"  High="1.06521"  Low="0.934786"   /> 
+      <OverallSys Name="jet_energy_scale"  High="1.09852"  Low="0.901478"   /> 
+      <OverallSys Name="jet_energy_res"  High="1.05419"  Low="0.945813"   /> 
+      <OverallSys Name="b_tag_NP_1"  High="1.24258"  Low="0.757424"   /> 
+      <OverallSys Name="b_tag_NP_2"  High="1.15496"  Low="0.84504"   /> 
+      <OverallSys Name="b_tag_NP_3"  High="1.09319"  Low="0.906808"   /> 
+      <OverallSys Name="b_tag_NP_4"  High="1.06442"  Low="0.935579"   /> 
       <OverallSys Name="w_plus_jets_scale_var"  High="1.025"  Low="0.975"   /> 
       <HistoSys Name="jet_energy_scale"  HistoFileLow="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameLow="4j2b_wjets_jet_energy_scale_norm_plus_shape_down"  HistoPathLow=""  HistoFileHigh="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameHigh="4j2b_wjets_jet_energy_scale_norm_plus_shape_up"  HistoPathHigh=""   /> 
       <HistoSys Name="jet_energy_res"  HistoFileLow="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameLow="4j2b_wjets_jet_energy_res_norm_plus_shape_down"  HistoPathLow=""  HistoFileHigh="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameHigh="4j2b_wjets_jet_energy_res_norm_plus_shape_up"  HistoPathHigh=""   /> 
@@ -55,15 +55,15 @@ This xml file created automatically on:
     </Sample>
 
 
-    <Sample Name="single_top_s"  HistoPath=""  HistoName="4j2b_single_top_s_chantemp_rebin_clone"  InputFile="data/temp_histos.root"  NormalizeByTheory="True" >
+    <Sample Name="single_top_s"  HistoPath=""  HistoName="4j2b_single_top_s_chan"  InputFile="data/histograms.root"  NormalizeByTheory="True" >
       <StatError Activate="True"  InputFile=""  HistoName=""  HistoPath=""  /> 
       <OverallSys Name="Lumi"  High="1.03"  Low="0.97"   /> 
-      <OverallSys Name="jet_energy_scale"  High="1.06995"  Low="0.930051"   /> 
-      <OverallSys Name="jet_energy_res"  High="1.00429"  Low="0.995707"   /> 
-      <OverallSys Name="b_tag_NP_1"  High="1.23916"  Low="0.760842"   /> 
-      <OverallSys Name="b_tag_NP_2"  High="1.15268"  Low="0.847325"   /> 
-      <OverallSys Name="b_tag_NP_3"  High="1.09869"  Low="0.901311"   /> 
-      <OverallSys Name="b_tag_NP_4"  High="1.06871"  Low="0.931293"   /> 
+      <OverallSys Name="jet_energy_scale"  High="1.06946"  Low="0.930543"   /> 
+      <OverallSys Name="jet_energy_res"  High="1.00678"  Low="0.993218"   /> 
+      <OverallSys Name="b_tag_NP_1"  High="1.2325"  Low="0.767495"   /> 
+      <OverallSys Name="b_tag_NP_2"  High="1.14863"  Low="0.85137"   /> 
+      <OverallSys Name="b_tag_NP_3"  High="1.09658"  Low="0.903416"   /> 
+      <OverallSys Name="b_tag_NP_4"  High="1.06775"  Low="0.932249"   /> 
       <HistoSys Name="jet_energy_scale"  HistoFileLow="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameLow="4j2b_single_top_s_jet_energy_scale_norm_plus_shape_down"  HistoPathLow=""  HistoFileHigh="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameHigh="4j2b_single_top_s_jet_energy_scale_norm_plus_shape_up"  HistoPathHigh=""   /> 
       <HistoSys Name="jet_energy_res"  HistoFileLow="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameLow="4j2b_single_top_s_jet_energy_res_norm_plus_shape_down"  HistoPathLow=""  HistoFileHigh="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameHigh="4j2b_single_top_s_jet_energy_res_norm_plus_shape_up"  HistoPathHigh=""   /> 
       <HistoSys Name="b_tag_NP_1"  HistoFileLow="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameLow="4j2b_single_top_s_b_tag_NP_1_norm_plus_shape_down"  HistoPathLow=""  HistoFileHigh="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameHigh="4j2b_single_top_s_b_tag_NP_1_norm_plus_shape_up"  HistoPathHigh=""   /> 
@@ -73,15 +73,15 @@ This xml file created automatically on:
     </Sample>
 
 
-    <Sample Name="single_top_t"  HistoPath=""  HistoName="4j2b_single_top_t_chantemp_rebin_clone"  InputFile="data/temp_histos.root"  NormalizeByTheory="True" >
+    <Sample Name="single_top_t"  HistoPath=""  HistoName="4j2b_single_top_t_chan"  InputFile="data/histograms.root"  NormalizeByTheory="True" >
       <StatError Activate="True"  InputFile=""  HistoName=""  HistoPath=""  /> 
       <OverallSys Name="Lumi"  High="1.03"  Low="0.97"   /> 
-      <OverallSys Name="jet_energy_scale"  High="1.06291"  Low="0.937086"   /> 
-      <OverallSys Name="jet_energy_res"  High="0.997574"  Low="1.00243"   /> 
-      <OverallSys Name="b_tag_NP_1"  High="1.21258"  Low="0.787425"   /> 
-      <OverallSys Name="b_tag_NP_2"  High="1.13865"  Low="0.861346"   /> 
-      <OverallSys Name="b_tag_NP_3"  High="1.09304"  Low="0.90696"   /> 
-      <OverallSys Name="b_tag_NP_4"  High="1.06745"  Low="0.932553"   /> 
+      <OverallSys Name="jet_energy_scale"  High="1.06015"  Low="0.939854"   /> 
+      <OverallSys Name="jet_energy_res"  High="0.993013"  Low="1.00699"   /> 
+      <OverallSys Name="b_tag_NP_1"  High="1.2081"  Low="0.791905"   /> 
+      <OverallSys Name="b_tag_NP_2"  High="1.13611"  Low="0.863885"   /> 
+      <OverallSys Name="b_tag_NP_3"  High="1.09171"  Low="0.90829"   /> 
+      <OverallSys Name="b_tag_NP_4"  High="1.06686"  Low="0.933141"   /> 
       <HistoSys Name="jet_energy_scale"  HistoFileLow="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameLow="4j2b_single_top_t_jet_energy_scale_norm_plus_shape_down"  HistoPathLow=""  HistoFileHigh="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameHigh="4j2b_single_top_t_jet_energy_scale_norm_plus_shape_up"  HistoPathHigh=""   /> 
       <HistoSys Name="jet_energy_res"  HistoFileLow="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameLow="4j2b_single_top_t_jet_energy_res_norm_plus_shape_down"  HistoPathLow=""  HistoFileHigh="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameHigh="4j2b_single_top_t_jet_energy_res_norm_plus_shape_up"  HistoPathHigh=""   /> 
       <HistoSys Name="b_tag_NP_1"  HistoFileLow="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameLow="4j2b_single_top_t_b_tag_NP_1_norm_plus_shape_down"  HistoPathLow=""  HistoFileHigh="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameHigh="4j2b_single_top_t_b_tag_NP_1_norm_plus_shape_up"  HistoPathHigh=""   /> 
@@ -91,15 +91,15 @@ This xml file created automatically on:
     </Sample>
 
 
-    <Sample Name="single_top_tW"  HistoPath=""  HistoName="4j2b_single_top_tWtemp_rebin_clone"  InputFile="data/temp_histos.root"  NormalizeByTheory="True" >
+    <Sample Name="single_top_tW"  HistoPath=""  HistoName="4j2b_single_top_tW"  InputFile="data/histograms.root"  NormalizeByTheory="True" >
       <StatError Activate="True"  InputFile=""  HistoName=""  HistoPath=""  /> 
       <OverallSys Name="Lumi"  High="1.03"  Low="0.97"   /> 
-      <OverallSys Name="jet_energy_scale"  High="1.05974"  Low="0.940263"   /> 
-      <OverallSys Name="jet_energy_res"  High="1.00222"  Low="0.99778"   /> 
-      <OverallSys Name="b_tag_NP_1"  High="1.22134"  Low="0.778661"   /> 
-      <OverallSys Name="b_tag_NP_2"  High="1.14262"  Low="0.857383"   /> 
-      <OverallSys Name="b_tag_NP_3"  High="1.09867"  Low="0.901334"   /> 
-      <OverallSys Name="b_tag_NP_4"  High="1.0717"  Low="0.928304"   /> 
+      <OverallSys Name="jet_energy_scale"  High="1.05717"  Low="0.942832"   /> 
+      <OverallSys Name="jet_energy_res"  High="1.00042"  Low="0.999584"   /> 
+      <OverallSys Name="b_tag_NP_1"  High="1.21584"  Low="0.78416"   /> 
+      <OverallSys Name="b_tag_NP_2"  High="1.13957"  Low="0.860428"   /> 
+      <OverallSys Name="b_tag_NP_3"  High="1.0969"  Low="0.903101"   /> 
+      <OverallSys Name="b_tag_NP_4"  High="1.0708"  Low="0.929196"   /> 
       <HistoSys Name="jet_energy_scale"  HistoFileLow="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameLow="4j2b_single_top_tW_jet_energy_scale_norm_plus_shape_down"  HistoPathLow=""  HistoFileHigh="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameHigh="4j2b_single_top_tW_jet_energy_scale_norm_plus_shape_up"  HistoPathHigh=""   /> 
       <HistoSys Name="jet_energy_res"  HistoFileLow="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameLow="4j2b_single_top_tW_jet_energy_res_norm_plus_shape_down"  HistoPathLow=""  HistoFileHigh="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameHigh="4j2b_single_top_tW_jet_energy_res_norm_plus_shape_up"  HistoPathHigh=""   /> 
       <HistoSys Name="b_tag_NP_1"  HistoFileLow="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameLow="4j2b_single_top_tW_b_tag_NP_1_norm_plus_shape_down"  HistoPathLow=""  HistoFileHigh="ROOT_AGC_Utils/HistFactoryExtra.root"  HistoNameHigh="4j2b_single_top_tW_b_tag_NP_1_norm_plus_shape_up"  HistoPathHigh=""   /> 

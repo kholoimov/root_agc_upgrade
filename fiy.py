@@ -3,9 +3,9 @@ from root_utils import ROOT_AGC_Utils
 
 root_utils = ROOT_AGC_Utils()
 
-root_utils.set_xmin(110)
-root_utils.set_rebinning(2)
-root_utils.apply_rebinning("data/histograms.root", "data/temp_histos.root")
+# root_utils.set_xmin(110)
+# root_utils.set_rebinning(2)
+# root_utils.apply_rebinning("data/histograms.root", "data/temp_histos.root")
 
 # root_utils.set_output_path("temp_histos.root")
 
@@ -13,11 +13,11 @@ meas = ROOT.RooStats.HistFactory.Measurement("meas", "meas")
 meas.SetLumi(1.0)
 meas.SetLumiRelErr(0.0)
 
-input_file = "data/temp_histos.root"
+input_file = "data/histograms.root"
 
 channel = ROOT.RooStats.HistFactory.Channel("channel_4j1b_CR")
 channel.SetData("4j1b_pseudodata", input_file)
-channel.SetStatErrorConfig(0.001, "Gaussian")
+channel.SetStatErrorConfig(0.01, "Gaussian")
 
 ttbar = ROOT.RooStats.HistFactory.Sample("ttbar", "4j1b_ttbar", input_file)
 ttbar.AddOverallSys("Lumi", 0.97, 1.03)
@@ -108,7 +108,7 @@ meas.AddChannel(channel)
 
 channel_2b = ROOT.RooStats.HistFactory.Channel("channel_4j2b_SR")
 channel_2b.SetData("4j2b_pseudodata", input_file)
-channel_2b.SetStatErrorConfig(0.001, "Gaussian")
+channel_2b.SetStatErrorConfig(0.01, "Gaussian")
 
 ttbar = ROOT.RooStats.HistFactory.Sample("ttbar", "4j2b_ttbar", input_file)
 ttbar.AddOverallSys("Lumi", 0.97, 1.03)
