@@ -1,0 +1,17 @@
+<!--
+This xml file created automatically on: 
+2024-6-30
+-->
+<!DOCTYPE Combination  SYSTEM 'HistFactorySchema.dtd'>
+
+<Combination OutputFilePrefix="" >
+
+
+  <Input>./xmlFromPy/meas_channel_4j1b_CR.xml</Input>
+  <Input>./xmlFromPy/meas_channel_4j2b_SR.xml</Input>
+
+  <Measurement Name="meas" Lumi="1" LumiRelErr="0" ExportOnly="False"  >
+    <POI>ttbar_norm</POI>  
+  </Measurement> 
+
+</Combination>
