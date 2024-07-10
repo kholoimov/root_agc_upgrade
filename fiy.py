@@ -3,21 +3,21 @@ from root_utils import ROOT_AGC_Utils
 
 root_utils = ROOT_AGC_Utils()
 
-# root_utils.set_xmin(110)
-# root_utils.set_rebinning(2)
-# root_utils.apply_rebinning("data/histograms.root", "data/temp_histos.root")
+root_utils.set_xmin(110)
+root_utils.set_rebinning(2)
+root_utils.apply_rebinning("data/histograms.root", "data/temp_histos.root")
 
-# root_utils.set_output_path("temp_histos.root")
+root_utils.set_output_path("temp_histos.root")
 
 meas = ROOT.RooStats.HistFactory.Measurement("meas", "meas")
 meas.SetLumi(1.0)
 meas.SetLumiRelErr(0.0)
 
-input_file = "data/histograms.root"
+input_file = "data/temp_histos.root"
 
 channel = ROOT.RooStats.HistFactory.Channel("channel_4j1b_CR")
 channel.SetData("4j1b_pseudodata", input_file)
-channel.SetStatErrorConfig(0.01, "Gaussian")
+channel.SetStatErrorConfig(0.001, "Gaussian")
 
 ttbar = ROOT.RooStats.HistFactory.Sample("ttbar", "4j1b_ttbar", input_file)
 ttbar.AddOverallSys("Lumi", 0.97, 1.03)
@@ -108,7 +108,7 @@ meas.AddChannel(channel)
 
 channel_2b = ROOT.RooStats.HistFactory.Channel("channel_4j2b_SR")
 channel_2b.SetData("4j2b_pseudodata", input_file)
-channel_2b.SetStatErrorConfig(0.01, "Gaussian")
+channel_2b.SetStatErrorConfig(0.001, "Gaussian")
 
 ttbar = ROOT.RooStats.HistFactory.Sample("ttbar", "4j2b_ttbar", input_file)
 ttbar.AddOverallSys("Lumi", 0.97, 1.03)
@@ -197,6 +197,17 @@ meas.AddChannel(channel_2b)
 
 meas.SetPOI("ttbar_norm")
 meas.CollectHistograms()
+meas.SetExportOnly(True)
+
+# Print streams configuration
+ROOT.RooMsgService.instance().Print()
+ 
+# Add Integration topic to existing INFO stream
+# ROOT.RooMsgService.instance().getStream(1).addTopic(ROOT.RooFit.Integration)
+
+ROOT.RooMsgService.instance().getStream(1).removeTopic(ROOT.RooFit.Minimization);
+ROOT.RooMsgService.instance().getStream(1).removeTopic(ROOT.RooFit.NumIntegration);
+ROOT.RooMsgService.instance().getStream(1).removeTopic(ROOT.RooFit.Eval);
 
 ws = ROOT.RooStats.HistFactory.MakeModelAndMeasurementFast(meas)
 
@@ -213,7 +224,7 @@ globalObservables = ROOT.RooArgSet(modelConfig.GetGlobalObservables())
 meas.PrintXML("xmlFromPy", meas.GetOutputFilePrefix())
 
 # Perform the fit
-result = pdf.fitTo(ws.data("obsData"), ROOT.RooFit.Save(), ROOT.RooFit.PrintLevel(ROOT.RooFit.FATAL), ROOT.RooFit.GlobalObservables(globalObservables))
+result = pdf.fitTo(ws.data("obsData"), ROOT.RooFit.Save(), ROOT.RooFit.PrintLevel(-1), ROOT.RooFit.PrintEvalErrors(0), ROOT.RooFit.Verbose(False), ROOT.RooFit.Warnings(False), ROOT.RooFit.GlobalObservables(globalObservables))
 
 # Print the fit result
 result.Print()

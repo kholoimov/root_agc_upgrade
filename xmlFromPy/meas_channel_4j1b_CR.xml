@@ -1,16 +1,16 @@
 <!--
 This xml file created automatically on: 
-2024-7-4
+2024-7-10
 -->
 <!DOCTYPE Channel  SYSTEM 'HistFactorySchema.dtd'>  
 
   <Channel Name="channel_4j1b_CR" InputFile="" >
 
-    <Data HistoName="4j1b_pseudodata" InputFile="data/histograms.root" HistoPath=""  /> 
+    <Data HistoName="4j1b_pseudodatatemp_rebin_clone" InputFile="data/temp_histos.root" HistoPath=""  /> 
 
-    <StatErrorConfig RelErrorThreshold="0.01" ConstraintType="Gaussian" /> 
+    <StatErrorConfig RelErrorThreshold="0.001" ConstraintType="Gaussian" /> 
 
-    <Sample Name="ttbar"  HistoPath=""  HistoName="4j1b_ttbar"  InputFile="data/histograms.root"  NormalizeByTheory="True" >
+    <Sample Name="ttbar"  HistoPath=""  HistoName="4j1b_ttbartemp_rebin_clone"  InputFile="data/temp_histos.root"  NormalizeByTheory="True" >
       <StatError Activate="True"  InputFile=""  HistoName=""  HistoPath=""  /> 
       <OverallSys Name="Lumi"  High="1.03"  Low="0.97"   /> 
       <OverallSys Name="ME_variation"  High="1.24448"  Low="0.755519"   /> 
@@ -35,7 +35,7 @@ This xml file created automatically on:
     </Sample>
 
 
-    <Sample Name="wjets"  HistoPath=""  HistoName="4j1b_wjets"  InputFile="data/histograms.root"  NormalizeByTheory="True" >
+    <Sample Name="wjets"  HistoPath=""  HistoName="4j1b_wjetstemp_rebin_clone"  InputFile="data/temp_histos.root"  NormalizeByTheory="True" >
       <StatError Activate="True"  InputFile=""  HistoName=""  HistoPath=""  /> 
       <OverallSys Name="Lumi"  High="1.03"  Low="0.97"   /> 
       <OverallSys Name="jet_energy_scale"  High="1.08146"  Low="0.918544"   /> 
@@ -55,7 +55,7 @@ This xml file created automatically on:
     </Sample>
 
 
-    <Sample Name="single_top_s"  HistoPath=""  HistoName="4j1b_single_top_s_chan"  InputFile="data/histograms.root"  NormalizeByTheory="True" >
+    <Sample Name="single_top_s"  HistoPath=""  HistoName="4j1b_single_top_s_chantemp_rebin_clone"  InputFile="data/temp_histos.root"  NormalizeByTheory="True" >
       <StatError Activate="True"  InputFile=""  HistoName=""  HistoPath=""  /> 
       <OverallSys Name="Lumi"  High="1.03"  Low="0.97"   /> 
       <OverallSys Name="jet_energy_scale"  High="1.06217"  Low="0.93783"   /> 
@@ -73,7 +73,7 @@ This xml file created automatically on:
     </Sample>
 
 
-    <Sample Name="single_top_t"  HistoPath=""  HistoName="4j1b_single_top_t_chan"  InputFile="data/histograms.root"  NormalizeByTheory="True" >
+    <Sample Name="single_top_t"  HistoPath=""  HistoName="4j1b_single_top_t_chantemp_rebin_clone"  InputFile="data/temp_histos.root"  NormalizeByTheory="True" >
       <StatError Activate="True"  InputFile=""  HistoName=""  HistoPath=""  /> 
       <OverallSys Name="Lumi"  High="1.03"  Low="0.97"   /> 
       <OverallSys Name="jet_energy_scale"  High="1.05772"  Low="0.942276"   /> 
@@ -91,7 +91,7 @@ This xml file created automatically on:
     </Sample>
 
 
-    <Sample Name="single_top_tW"  HistoPath=""  HistoName="4j1b_single_top_tW"  InputFile="data/histograms.root"  NormalizeByTheory="True" >
+    <Sample Name="single_top_tW"  HistoPath=""  HistoName="4j1b_single_top_tWtemp_rebin_clone"  InputFile="data/temp_histos.root"  NormalizeByTheory="True" >
       <StatError Activate="True"  InputFile=""  HistoName=""  HistoPath=""  /> 
       <OverallSys Name="Lumi"  High="1.03"  Low="0.97"   /> 
       <OverallSys Name="jet_energy_scale"  High="1.05812"  Low="0.941876"   /> 
