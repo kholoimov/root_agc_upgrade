@@ -5,7 +5,11 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
     def __init__(self, name, histo_name, histo_file, histo_path = ""):
         ROOT.RooStats.HistFactory.Sample.__init__(self, name, histo_name, histo_file, histo_path)
         self.output_path = 'ROOT_AGC_Utils/HistFactoryExtra.root'
-        self.fInputFile = None
+        self.fInputFile = ""
+
+    def __del__(self):
+        # Custom cleanup code here
+        print(f"AGC_Sample instance {self.GetName()} is being destroyed")
 
     def SetSystematicsInputFile(self, file):
         self.fInputFile = file
@@ -73,7 +77,7 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
         if histofile_up is None:
             histofile_up = self.fInputFile
             histofile_down = self.fInputFile
-            assert histofile_up is not None, "ERROR: You not specified input file for sample"
+            assert histofile_up != "", "ERROR: You not specified input file for sample"
 
         if histoname_down is None:
             self.Symmetrize_AddNormPlusShapeHistoSys(name, histoname_up, histofile_up, histopath_up)
@@ -107,8 +111,8 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
         hist_up_name  = str(channel_name + "_" + str(self.GetName()) + "_" + name  + "_norm_plus_shape_up")
         hist_down_name = str(channel_name + "_" + str(self.GetName()) + "_" + name  + "_norm_plus_shape_down")
 
-        print(h_down)
-        print(h_new)
+        # print(h_down)
+        # print(h_new)
 
         h_new.Write(hist_up_name)
         h_down.Write(hist_down_name)
@@ -167,8 +171,8 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
         hist_up_name  = str(channel_name + "_" + str(self.GetName()) + "_" + name  + "_norm_plus_shape_up")
         hist_down_name = str(channel_name + "_" + str(self.GetName()) + "_" + name  + "_norm_plus_shape_down")
 
-        print(h_new_down)
-        print(h_new_up)
+        # print(h_new_down)
+        # print(h_new_up)
 
         h_new_up.Write(hist_up_name)
         h_new_down.Write(hist_down_name)
