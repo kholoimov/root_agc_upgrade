@@ -229,7 +229,12 @@ class RebinningTool:
 
         return output
        
-    def apply_rebinning(self, input_file_path, output_file_path):
+    def apply_rebinning(self, input_file_path = None, output_file_path = None):
+        if input_file_path is None:
+            input_file_path = self.input_path
+        if output_file_path is None:
+            output_file_path = self.output_path
+            
         file = ROOT.TFile(input_file_path, "READ")
 
         output_file = ROOT.TFile(output_file_path, "RECREATE")
@@ -252,6 +257,9 @@ class RebinningTool:
             output_file.Close()
 
         file.Close()
+
+    def set_input_path(self, input_path):
+        self.input_path = input_path
 
     def set_output_path(self, output_path):
         self.output_path = output_path
