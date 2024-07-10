@@ -10,12 +10,71 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
     def SetSystematicsInputFile(self, file):
         self.fInputFile = file
 
+    def AddHistoSys(self, name, histoname_up = None, histofile_up = None, histopath_up = "",
+                    histoname_down = None, histofile_down = None, histopath_down = ""):
+        
+        histSys = ROOT.RooStats.HistFactory.HistoSys()
+
+        if (histofile_up is None):
+            histofile_down  =   self.fInputFile
+            histofile_up    =   self.fInputFile
+
+        histSys.SetName(name)
+        histSys.SetHistoName(self.GetHistoName())
+        histSys.SetHistoPathHigh(histopath_up)
+        histSys.SetHistoPathLow(histopath_down)
+        histSys.SetHistoNameHigh(histoname_up)
+        histSys.SetHistoNameLow(histoname_down)
+        histSys.SetInputFileHigh(histofile_up)
+        histSys.SetInputFileLow(histofile_down)
+
+        self.GetHistoSysList().push_back(histSys)
+
+    def AddHistoFactor(self, name, histoname_up = None, histofile_up = None, histopath_up = "",
+                    histoname_down = None, histofile_down = None, histopath_down = ""):
+        
+        histFactor = ROOT.RooStats.HistFactory.HistoFactor()
+
+        if (histofile_up is None):
+            histofile_down  =   self.fInputFile
+            histofile_up    =   self.fInputFile
+
+        histFactor.SetName(name)
+        histFactor.SetHistoName(self.GetHistoName())
+        histFactor.SetHistoPathHigh(histopath_up)
+        histFactor.SetHistoPathLow(histopath_down)
+        histFactor.SetHistoNameHigh(histoname_up)
+        histFactor.SetHistoNameLow(histoname_down)
+        histFactor.SetInputFileHigh(histofile_up)
+        histFactor.SetInputFileLow(histofile_down)
+
+        self.GetHistoFactorList().push_back(histFactor)
+
+    def AddShapeSys(self, name, constraint_type = None, histoname = None, histofile = None, histopath = ""):
+        
+        shapeSys = ROOT.RooStats.HistFactory.ShapeSys()
+
+        if histofile is None:
+            histofile = self.fInputFile
+
+        shapeSys.SetName(name)
+        shapeSys.SetHistoName(self.GetHistoName())
+        shapeSys.SetHistoPath(histopath)
+        shapeSys.SetInputFile(histofile)
+
+        shapeSys.SetConstraintType(constraint_type)
+
+        self.GetShapeSysList().push_back(shapeSys)
+
+
+
     def AddNormPlusShapeHistoSys(self, name, histoname_up = None, histofile_up = None, histopath_up = "",
                                  histoname_down = None, histofile_down = None, histopath_down = ""):
         if histofile_up is None:
             histofile_up = self.fInputFile
             histofile_down = self.fInputFile
             assert histofile_up is not None, "ERROR: You not specified input file for sample"
+
         if histoname_down is None:
             self.Symmetrize_AddNormPlusShapeHistoSys(name, histoname_up, histofile_up, histopath_up)
         else:
@@ -265,3 +324,8 @@ class RebinningTool:
         self.output_path = output_path
         file = ROOT.TFile(self.output_path, "RECREATE")
         file.Close()
+
+def MuteTool():
+    ROOT.RooMsgService.instance().getStream(1).removeTopic(ROOT.RooFit.Minimization);
+    ROOT.RooMsgService.instance().getStream(1).removeTopic(ROOT.RooFit.NumIntegration);
+    ROOT.RooMsgService.instance().getStream(1).removeTopic(ROOT.RooFit.Eval);

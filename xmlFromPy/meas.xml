@@ -10,7 +10,7 @@ This xml file created automatically on:
   <Input>./xmlFromPy/meas_channel_4j1b_CR.xml</Input>
   <Input>./xmlFromPy/meas_channel_4j2b_SR.xml</Input>
 
-  <Measurement Name="meas" Lumi="1" LumiRelErr="0" ExportOnly="False"  >
+  <Measurement Name="meas" Lumi="1" LumiRelErr="0" ExportOnly="True"  >
     <POI>ttbar_norm</POI>  
   </Measurement> 
 

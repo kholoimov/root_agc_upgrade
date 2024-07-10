@@ -57,7 +57,7 @@ This xml file created automatically on:
 
     <Sample Name="single_top_s"  HistoPath=""  HistoName="4j1b_single_top_s_chantemp_rebin_clone"  InputFile="data/temp_histos.root"  NormalizeByTheory="True" >
       <StatError Activate="True"  InputFile=""  HistoName=""  HistoPath=""  /> 
-      <OverallSys Name="Lumi"  High="1.03"  Low="0.97"   /> 
+      <OverallSys Name="Lumi"  High="1"  Low="0.97"   /> 
       <OverallSys Name="jet_energy_scale"  High="1.06217"  Low="0.93783"   /> 
       <OverallSys Name="jet_energy_res"  High="1.00704"  Low="0.992962"   /> 
       <OverallSys Name="b_tag_NP_1"  High="1.1895"  Low="0.810498"   /> 
