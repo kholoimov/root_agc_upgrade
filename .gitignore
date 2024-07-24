@@ -1,5 +1,6 @@
 *.root
 *.eps
 *.json
+*.png
 *.table
 __pycache__/

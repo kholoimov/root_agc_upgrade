@@ -333,3 +333,102 @@ def MuteTool():
     ROOT.RooMsgService.instance().getStream(1).removeTopic(ROOT.RooFit.Minimization);
     ROOT.RooMsgService.instance().getStream(1).removeTopic(ROOT.RooFit.NumIntegration);
     ROOT.RooMsgService.instance().getStream(1).removeTopic(ROOT.RooFit.Eval);
+
+
+class Visualization:
+    def CreateAndSavePicture(self, filename, fWorkspace):
+        # std::vector<TString> names;
+        # std::vector<double> values;
+        # std::vector<double> errors;
+        names = []
+        values = []
+        errors = []
+
+        vars = fWorkspace.allVars();
+        # for (auto var : vars)
+        for var in vars:
+            name = var.GetName();
+            if ("alpha" in name):
+                if (fWorkspace.var(name).getVal() == 0): continue
+                names += [name];
+                values += [fWorkspace.var(name).getVal()]
+                errors += [fWorkspace.var(name).getError()]
+
+        num = len(names)
+
+        ROOT.gStyle.SetPalette(1);
+        c1 =  ROOT.TCanvas("c1", "c1", 1200, 600)
+        c1.SetLeftMargin(0.2);
+
+        
+
+        frame =  ROOT.TH2F("frame", "", 6, -3, 3, num, 0, num);
+
+
+        frame.Draw("");
+
+
+        box = ROOT.TBox(-2, 0, 2, num);
+        box.SetFillColorAlpha(ROOT.kYellow - 9, 0.8);
+        box.Draw("same A");
+
+        box_internal = ROOT.TBox(-1, 0, 1, num);
+        box_internal.SetFillColorAlpha(ROOT.kGreen - 9, 0.5);
+        box_internal.Draw("same A");
+
+        axis = ROOT.TGaxis(-3, num, 3, num,-3, 3, 510,"-");
+        xaxis = ROOT.TGaxis(3, 0, 3, num, 0, num, num ,"+S");
+
+        frame.GetYaxis().SetTickLength(0.);
+        xaxis.SetTickLength(0.);
+
+        # // frame.Draw("X+");
+
+        graph = ROOT.TGraph();
+        lines = []
+        right_ticks = []
+        left_ticks = []
+
+        # for (int i = 0; i < num; ++i)
+        for i in range(num):
+            graph.SetPoint(i,  values[i], i + 0.5);
+            frame.GetYaxis().SetBinLabel(i + 1, names[i]);
+
+            lines += [ROOT.TLine(values[i] - errors[i], i + 0.5, values[i] + errors[i], i + 0.5)]
+            lines[-1].SetLineColor(ROOT.kBlack);
+            lines[-1].SetLineWidth(2);
+            lines[-1].Draw();
+
+            left_ticks += [ROOT.TLine(-3, i + 0.5, -2.95, i + 0.5)]
+            left_ticks[-1].SetLineColor(ROOT.kBlack);
+            left_ticks[-1].SetLineWidth(1);
+            left_ticks[-1].Draw();
+
+            right_ticks += [ROOT.TLine(2.95, i + 0.5, 3, i + 0.5)]
+            right_ticks[-1].SetLineColor(ROOT.kBlack);
+            right_ticks[-1].SetLineWidth(1);
+            right_ticks[-1].Draw();
+
+
+        tl = ROOT.TLine(0, 0, 0, num);
+        tl.SetLineStyle(2);
+        tl.Draw();
+
+
+        graph.SetMarkerStyle(20);
+        graph.SetMarkerSize(1);
+        graph.SetMarkerColor(ROOT.kBlack);
+
+        graph.Draw("P same");
+
+        frame.SetStats(0);
+        axis.SetLabelSize(0.0);
+        axis.Draw();
+
+        xaxis.SetLabelSize(0.0);
+        xaxis.Draw();
+
+        ROOT.gPad.RedrawAxis(); 
+
+        c1.Draw();
+        c1.SaveAs(filename);

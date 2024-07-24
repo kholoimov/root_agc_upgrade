@@ -7,7 +7,7 @@ rebinning_tool = RebinningTool() # Rebinning as extra step (was discussed with J
 rebinning_tool.set_xmin(110)
 rebinning_tool.set_rebin(2)
 rebinning_tool.set_input_path("data/histograms.root")
-rebinning_tool.set_output_path("data/temp_histos.root") # if you dont specify this -> overwrite (?)
+rebinning_tool.set_output_path("data/temp_histos.root") # if you dont specify this -> input path with suffix
 rebinning_tool.apply_rebinning()
 
 meas = ROOT.RooStats.HistFactory.Measurement("meas", "meas")
