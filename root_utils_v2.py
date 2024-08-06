@@ -1,6 +1,6 @@
 import ROOT
 import math
-
+import numpy as np
 class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
     def __init__(self, name, histo_name, histo_file, histo_path = ""):
         ROOT.RooStats.HistFactory.Sample.__init__(self, name, histo_name, histo_file, histo_path)
@@ -430,5 +430,263 @@ class Visualization:
 
         ROOT.gPad.RedrawAxis(); 
 
-        c1.Draw();
         c1.SaveAs(filename);
+        c1.Draw();
+
+        
+class DrawModel:
+
+    predefined_colors = [
+        ROOT.TColor.GetColor("#F6C3C0"),  # Light Red
+        ROOT.TColor.GetColor("#A9D0F5"),  # Light Blue
+        ROOT.TColor.GetColor("#B6D7A8"),  # Light Green
+        ROOT.TColor.GetColor("#EAD1DC"),  # Light Magenta
+        ROOT.TColor.GetColor("#D0E9E8"),  # Light Cyan
+        ROOT.TColor.GetColor("#F6F9C6"),  # Light Yellow
+        ROOT.TColor.GetColor("#F6B8A3"),  # Light Orange
+        ROOT.TColor.GetColor("#F9C6E5"),  # Light Pink
+        ROOT.TColor.GetColor("#B6D9D7"),  # Light Teal
+        ROOT.TColor.GetColor("#C6E2B6"),  # Light Spring Green
+        ROOT.TColor.GetColor("#D0E1F9"),  # Light Azure
+        ROOT.TColor.GetColor("#E3D6F1"),  # Light Violet
+        ROOT.TColor.GetColor("#000000"),  # Black (for contrast)
+        ROOT.TColor.GetColor("#C0C0C0"),  # Gray
+        ROOT.TColor.GetColor("#F4A3A0"),  # Soft Red
+        ROOT.TColor.GetColor("#9AB9F5"),  # Soft Blue
+        ROOT.TColor.GetColor("#B5E5B0"),  # Soft Green
+        ROOT.TColor.GetColor("#F0A1B2"),  # Soft Magenta
+        ROOT.TColor.GetColor("#B0D6D5"),  # Soft Cyan
+        ROOT.TColor.GetColor("#F3F9A6")   # Soft Yellow
+    ]
+    
+    def __init__(self, meas, ws):
+        self.meas = meas
+        self.ws = ws
+        self.cv_array = []
+        self.hs_stacks = []
+        self.sample_histograms = []
+        self.bias_graphs = []
+        self.bias_second_graphs = []
+        self.normal_lines = []
+        self.second_histos = []
+        self.second_hs_stacks = []
+        self.afterfit_histograms = []
+        self.error_graphs = []
+        self.error_pre_graphs = []
+
+    def get_yields(self, variable, observables, pdf, result=None):
+        """Also get uncertainties if you pass a fit result.
+        """
+        yields = np.zeros(variable.numBins())
+        yields_uncert = np.zeros(variable.numBins())
+        sample_values = {}
+        for i_bin in range(variable.numBins()):
+            variable.setBin(i_bin)
+            bin_width = variable.getBinWidth(i_bin)
+            for i_sample in range(pdf.funcList().size()):
+                sample_yield = ROOT.RooProduct("tmp", "tmp", [pdf.funcList()[i_sample], pdf.coefList()[i_sample]])
+                if i_sample in sample_values:
+                    sample_values[i_sample] += [bin_width * sample_yield.getVal()]
+                else:
+                    sample_values[i_sample] = [bin_width * sample_yield.getVal()]
+                yields[i_bin] += bin_width * sample_yield.getVal()
+                if result is not None:
+                    yields_uncert[i_bin] += bin_width * sample_yield.getPropagatedError(result, observables)
+        return yields, yields_uncert, sample_values
+    
+    def Draw(self, result):
+        for channel in self.meas.GetChannels():
+            channel_pdf = self.ws[str(channel.GetName()) + "_model"]
+            obs_var = self.ws["obs_x_" + str(channel.GetName())]
+            observables = ROOT.RooArgSet(obs_var)
+
+            
+            divide_value = 0.3
+            # print(channel.GetName())
+            # channel_name = str(channel.GetName())
+            self.cv_array += [ROOT.TCanvas("canvas" +  str(channel.GetName()), "canvas" +  str(channel.GetName()), 1500, 600)]
+            # self.cv_array[-1].Divide(2, 1)
+            # self.cv_array[-1].cd(1)
+            pad1_upper = ROOT.TPad("pad1_upper" + str(channel.GetName()), "pad1_upper" + str(channel.GetName()), 0, divide_value, 0.5, 1)
+            pad1_upper.Draw()
+            pad1_bottom = ROOT.TPad("pad1_bottom" + str(channel.GetName()), "pad1_bottom" + str(channel.GetName()), 0, 0, 0.5, divide_value)
+            pad1_bottom.Draw()
+
+            pad2_upper = ROOT.TPad("pad2_upper" + str(channel.GetName()), "pad2_upper" + str(channel.GetName()), 0.5, divide_value, 1, 1)
+            pad2_upper.Draw()
+            pad2_bottom = ROOT.TPad("pad2_bottom" + str(channel.GetName()), "pad2_bottom" + str(channel.GetName()), 0.5, 0, 1, divide_value)    
+            pad2_bottom.Draw()
+            # pad2.cd()
+            # print(channel)
+            pad1_upper.cd()
+            data_histogram = channel.GetData().GetHisto()
+            data_histogram.SetStats(0)
+            data_histogram.SetMarkerStyle(8)
+            data_histogram.SetMarkerSize(0.5)
+
+
+            prefit_yields, prefit_unc, prefit_sample_values = self.get_yields(obs_var, observables, channel_pdf)
+
+            self.error_pre_graphs += [ROOT.TGraphErrors("prefit, prefit")]
+
+            bin_index = 1
+            for bin_value, bin_error in zip(prefit_yields, prefit_unc):
+                # afterfit_histograms[-1].SetBinContent(bin_index, bin_value)
+                # print(afterfit_histograms[-1].GetBinCenter(i), bin_value)
+                self.error_pre_graphs[-1].SetPoint(bin_index, data_histogram.GetBinCenter(bin_index), bin_value)
+                self.error_pre_graphs[-1].SetPointError(bin_index, 0, 0)
+                bin_index += 1
+
+
+            self.error_pre_graphs[-1].SetStats(0)
+            self.error_pre_graphs[-1].SetMarkerStyle(21)
+            self.error_pre_graphs[-1].SetMarkerSize(0.5)
+            self.error_pre_graphs[-1].SetLineStyle(0)
+
+            # pad1_upper.cd()
+
+
+            self.hs_stacks += [ROOT.THStack("hs" + str(channel.GetName()), "hs" + str(channel.GetName()))]
+            sample_histograms = []
+
+            for i, sample in enumerate(channel.GetSamples()):
+                # print(sample.GetName())
+                # sample_histograms += [sample.GetHisto()]
+                hist = sample.GetHisto()
+                hist.SetFillColor(self.predefined_colors[i])
+                hist.SetLineColor(ROOT.kBlack)
+                sample_histograms += [hist]
+                self.hs_stacks[-1].Add(sample_histograms[-1])
+
+            channel_name = "_".join(channel.GetName().split("_")[1:])
+            self.hs_stacks[-1].SetTitle(channel_name + " PREFIT")
+            self.hs_stacks[-1].Draw("hist")
+            self.error_pre_graphs[-1].Draw("same P")
+            # data_histogram.Draw("same")
+            # pad2.Draw()
+
+            pad1_bottom.cd()
+            number_of_bins = data_histogram.GetNbinsX()
+            self.bias_graphs += [ROOT.TGraph(number_of_bins)]
+            self.bias_graphs[-1].SetTitle("")
+            self.bias_graphs[-1].SetMarkerSize(0.4)
+            self.bias_graphs[-1].SetMarkerStyle(8)
+            bin_sums = [0] *  number_of_bins
+            for i in range(self.hs_stacks[-1].GetNhists()):
+                hist = self.hs_stacks[-1].GetHists().At(i)
+                for bin in range(1, number_of_bins + 1):
+                    bin_sums[bin - 1] += hist.GetBinContent(bin)
+            
+            for i in range(1, number_of_bins + 1):
+                self.bias_graphs[-1].SetPoint(i - 1, data_histogram.GetBinCenter(i), data_histogram.GetBinContent(i) / bin_sums[i - 1])
+
+            self.bias_graphs[-1].Draw("AP")
+            minimal_bin_value = data_histogram.GetBinLowEdge(1)
+            maximum_bin_value = data_histogram.GetBinLowEdge(number_of_bins) + data_histogram.GetBinWidth(number_of_bins)
+
+
+            self.bias_graphs[-1].GetYaxis().SetRangeUser(0.5, 1.5)
+            self.bias_graphs[-1].GetXaxis().SetRangeUser(minimal_bin_value, maximum_bin_value)
+
+            self.normal_lines += [ROOT.TLine(minimal_bin_value, 1, maximum_bin_value, 1)]
+            self.normal_lines[-1].SetLineStyle(2)
+            self.normal_lines[-1].SetLineWidth(1)
+            self.normal_lines[-1].Draw("same")
+            # dump_
+            # pad1.cd()
+            # pad1.Draw()
+            # self.cv_array[-1].Update()
+
+            pad2_upper.cd()
+
+            # second_histos += [data_histogram.Clone("second" + str(channel.GetName()))]
+            # second_histos[-1].Draw("same")
+
+            # allSample = channel.GetSamples()
+
+            # print(self.ws.allPdfs())
+            # for pdf in self.ws.allPdfs():
+                # print(pdf.GetName())
+
+            # temp_sample_histogram = []
+            # print(allSample)
+
+            # for ob in (self.ws.allVars()):
+                # print(ob.GetName())
+
+
+
+            # bookkeep prefit yields
+
+            postfit_yields, postfit_yields_uncert, postfit_sample_values = self.get_yields(obs_var, observables, channel_pdf, result)
+
+            self.afterfit_histograms += [ROOT.TH1F("afterfit", "afterfit", len(postfit_yields), minimal_bin_value, maximum_bin_value)]
+
+            self.error_graphs += [ROOT.TGraphErrors("postfit, postfit")]
+
+
+            bin_index = 1
+            for bin_value, bin_error in zip(postfit_yields, postfit_yields_uncert):
+                self.afterfit_histograms[-1].SetBinContent(bin_index, bin_value)
+                # print(self.afterfit_histograms[-1].GetBinCenter(i), bin_value)
+                self.error_graphs[-1].SetPoint(bin_index, self.afterfit_histograms[-1].GetBinCenter(bin_index), bin_value)
+                self.error_graphs[-1].SetPointError(bin_index, 0, bin_error)
+                # print(bin_value, bin_error)
+                bin_index += 1
+
+
+            self.error_graphs[-1].SetStats(0)
+            self.error_graphs[-1].SetMarkerStyle(21)
+            self.error_graphs[-1].SetMarkerSize(0.5)
+            self.error_graphs[-1].SetLineStyle(0)
+
+
+            self.second_hs_stacks += [ROOT.THStack("fitted stack", "fitted stack")]
+
+            # temp_histos
+            color_number = 0
+
+            for postfit in postfit_sample_values:
+                temp_histo = ROOT.TH1F("afterfit" + str(postfit), "afterfit" + str(postfit), len(postfit_yields), minimal_bin_value, maximum_bin_value)
+                temp_histo.SetFillColor(self.predefined_colors[color_number])
+                color_number += 1
+                bin_index = 1
+                for bin_value in postfit_sample_values[postfit]:
+                    temp_histo.SetBinContent(bin_index, bin_value)
+                    bin_index += 1
+                self.second_hs_stacks[-1].Add(temp_histo)
+
+            channel_name = "_".join(channel.GetName().split("_")[1:])
+            self.second_hs_stacks[-1].SetTitle(channel_name + " POSTFIT")
+            self.second_hs_stacks[-1].Draw("hist")
+            # afterfit_histograms[-1].Draw("same p")
+            self.error_graphs[-1].Draw("same P")
+
+            self.bias_second_graphs += [ROOT.TGraph(number_of_bins)]
+            self.bias_second_graphs[-1].SetTitle("")
+            self.bias_second_graphs[-1].SetMarkerSize(0.4)
+            self.bias_second_graphs[-1].SetMarkerStyle(8)
+
+            for i in range(1, number_of_bins + 1):
+                self.bias_second_graphs[-1].SetPoint(i - 1, data_histogram.GetBinCenter(i), data_histogram.GetBinContent(i) / postfit_yields[i - 1])
+
+            pad2_bottom.cd()
+            self.bias_second_graphs[-1].Draw("AP")
+            minimal_bin_value = data_histogram.GetBinLowEdge(1)
+            maximum_bin_value = data_histogram.GetBinLowEdge(number_of_bins) + data_histogram.GetBinWidth(number_of_bins)
+
+
+            self.bias_second_graphs[-1].GetYaxis().SetRangeUser(0.5, 1.5)
+            self.bias_second_graphs[-1].GetXaxis().SetRangeUser(minimal_bin_value, maximum_bin_value)
+
+            self.normal_lines += [ROOT.TLine(minimal_bin_value, 1, maximum_bin_value, 1)]
+            self.normal_lines[-1].SetLineStyle(2)
+            self.normal_lines[-1].SetLineWidth(1)
+            self.normal_lines[-1].Draw("same")
+
+            # print(postfit_sample_values)
+            # print(prefit_yields)
+
+
+            self.cv_array[-1].SaveAs("histo.png")
+            self.cv_array[-1].Draw()
