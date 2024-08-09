@@ -494,6 +494,94 @@ class DrawModel:
                     yields_uncert[i_bin] += bin_width * sample_yield.getPropagatedError(result, observables)
         return yields, yields_uncert, sample_values
     
+    def get_my_propagated_error(self, roo_abs_real, fit_result, param_set):
+        # Extract parameters from RooAbsReal and fit result
+        all_params_in_abs_real = ROOT.RooArgSet()
+        roo_abs_real.getParameters(param_set, all_params_in_abs_real)
+
+        param_list = fit_result.floatParsInit()
+        
+        plus_var = []
+        minus_var = []
+        # plus_var.reserve(param_list.size())
+        # minus_var.reserve(param_list.size())
+
+        # V = fit_result.covarianceMatrix() if param_list.size() == fit_result.floatParsInit().size() else fit_result.reducedCovarianceMatrix(param_list)
+
+        prefit_covariance_matrix = np.zeros((param_list.size(), param_list.size()))
+        for i in range(param_list.size()):
+            prefit_covariance_matrix[i][i] = param_list[i].getError()**2
+
+        V = prefit_covariance_matrix
+
+
+
+        for ivar in range(param_list.size()):
+            rrv = param_list.at(ivar)
+
+            cen_val = rrv.getVal()
+            err_val = np.sqrt(V[ivar][ivar])
+
+            # Make Plus variation
+            rrv.setVal(cen_val + err_val)
+            plus_var.append(all_params_in_abs_real[0].getVal())
+
+            # Make Minus variation
+            rrv.setVal(cen_val - err_val)
+            minus_var.append(all_params_in_abs_real[0].getVal())
+
+            rrv.setVal(cen_val)
+        
+        # Re-evaluate to ensure the state is consistent
+        # roo_abs_real.getVal(param_set)
+
+        # C = ROOT.TMatrixDSym(param_list.size())
+        C = np.zeros((param_list.size(), param_list.size()))
+        err_vec = np.zeros(param_list.size())
+
+        for i in range(param_list.size()):
+            err_vec[i] = np.sqrt(V[i][i])
+            for j in range(i, param_list.size()):
+                C[i][j] = V[i][j] / np.sqrt(V[i][i] * V[j][j])
+                C[j][i] = C[i][j]
+        
+        F = np.zeros(len(plus_var))
+        for j in range(len(plus_var)):
+            F[j] = (plus_var[j] - minus_var[j]) * 0.5
+
+        sum_error = np.dot(F, np.dot(V, F))
+
+        print(sum_error)
+        
+        return np.sqrt(sum_error)
+
+    # Example usage
+    # Assuming `roo_abs_real`, `fit_result`, and `param_set` are properly defined RooFit objects
+    # error = get_propagated_error(roo_abs_real, fit_result, param_set)
+    # print("Propagated Error:", error)
+
+
+    def get_prefit_yields(self, variable, observables, pdf, result=None):
+        """Also get uncertainties if you pass a fit result.
+        """
+        yields = np.zeros(variable.numBins())
+        yields_uncert = np.zeros(variable.numBins())
+        sample_values = {}
+        for i_bin in range(variable.numBins()):
+            variable.setBin(i_bin)
+            bin_width = variable.getBinWidth(i_bin)
+            for i_sample in range(pdf.funcList().size()):
+                sample_yield = ROOT.RooProduct("tmp", "tmp", [pdf.funcList()[i_sample], pdf.coefList()[i_sample]])
+                if i_sample in sample_values:
+                    sample_values[i_sample] += [bin_width * sample_yield.getVal()]
+                else:
+                    sample_values[i_sample] = [bin_width * sample_yield.getVal()]
+                yields[i_bin] += bin_width * sample_yield.getVal()
+                if result is not None:
+                    yields_uncert[i_bin] += bin_width * self.get_my_propagated_error(sample_yield, result, observables)
+        return yields, yields_uncert, sample_values
+
+    
     def Draw(self, result):
         for channel in self.meas.GetChannels():
             channel_pdf = self.ws[str(channel.GetName()) + "_model"]
@@ -525,7 +613,7 @@ class DrawModel:
             data_histogram.SetMarkerSize(0.5)
 
 
-            prefit_yields, prefit_unc, prefit_sample_values = self.get_yields(obs_var, observables, channel_pdf)
+            prefit_yields, prefit_unc, prefit_sample_values = self.get_prefit_yields(obs_var, observables, channel_pdf, result)
 
             self.error_pre_graphs += [ROOT.TGraphErrors("prefit, prefit")]
 
@@ -534,7 +622,7 @@ class DrawModel:
                 # afterfit_histograms[-1].SetBinContent(bin_index, bin_value)
                 # print(afterfit_histograms[-1].GetBinCenter(i), bin_value)
                 self.error_pre_graphs[-1].SetPoint(bin_index, data_histogram.GetBinCenter(bin_index), bin_value)
-                self.error_pre_graphs[-1].SetPointError(bin_index, 0, 0)
+                self.error_pre_graphs[-1].SetPointError(bin_index, 0, bin_error)
                 bin_index += 1
 
 
