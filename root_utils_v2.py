@@ -4,7 +4,7 @@ import numpy as np
 class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
     def __init__(self, name, histo_name, histo_file, histo_path = ""):
         ROOT.RooStats.HistFactory.Sample.__init__(self, name, histo_name, histo_file, histo_path)
-        self.output_path = 'ROOT_AGC_Utils/HistFactoryExtra.root'
+        self.output_path = 'data/HistFactoryExtra.root'
         self.fInputFile = ""
 
     def __del__(self):
