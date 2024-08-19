@@ -9,7 +9,8 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
 
     def __del__(self):
         # Custom cleanup code here
-        print(f"AGC_Sample instance {self.GetName()} is being destroyed")
+        pass
+        # print(f"AGC_Sample instance {self.GetName()} is being destroyed")
 
     def SetSystematicsInputFile(self, file):
         self.fInputFile = file
@@ -475,14 +476,12 @@ class DrawModel:
         self.error_graphs = []
         self.error_pre_graphs = []
 
-    # def calculat_uncert(self, )
     def get_yields(self, variable, observables, pdf, result, prefit = False):
         """Also get uncertainties if you pass a fit result.
         """
         yields = np.zeros(variable.numBins())
         yields_uncert = np.zeros(variable.numBins())
         sample_values = {}
-        total_events = pdf.expectedEvents(observables)
         for i_bin in range(variable.numBins()):
             variable.setBin(i_bin)
             bin_width = variable.getBinWidth(i_bin)
@@ -490,16 +489,10 @@ class DrawModel:
             if prefit:
                 fill_array = np.zeros((pdf.funcList().size(), len(pdf.getParameters(observables))))
                 all_params = pdf.getParameters(observables)
-                # all_params = result.flo
                 param_values = result.floatParsInit()
 
                 for i_sample in range(pdf.funcList().size()):
                     sample_yield = ROOT.RooProduct("tmp", "tmp", [pdf.funcList()[i_sample], pdf.coefList()[i_sample]])
-                    # if i_sample in sample_values:
-                    #     sample_values[i_sample] += [bin_width * sample_yield.getVal()]
-                    # else:
-                    #     sample_values[i_sample] = [bin_width * sample_yield.getVal()]
-                    # yields[i_bin] += bin_width * sample_yield.getVal()
 
                     for j_parameter, par in enumerate(all_params):
                         
@@ -525,19 +518,134 @@ class DrawModel:
                 yields_uncert[i_bin] = np.sqrt(total_uncertainty) * bin_width        
 
             else:
+                all_pdf_params = pdf.getParameters(observables)
+
+                required_params = [i for i in all_pdf_params if i.getError() > 0.001]
+
+                fill_array = np.zeros((pdf.funcList().size(), len(required_params)))
+
+                number_of_parameters = len(required_params)
+                corr_matrix = result.reducedCovarianceMatrix(required_params)
+
+                numpy_corr_matrix = np.zeros((number_of_parameters, number_of_parameters))
+
+                for i_index in range(number_of_parameters):
+                    for j_index in range(i_index, number_of_parameters):
+                        numpy_corr_matrix[i_index, j_index] = corr_matrix[i_index, j_index] / np.sqrt(corr_matrix[i_index, i_index] * corr_matrix[j_index, j_index])
+                        numpy_corr_matrix[j_index, i_index] = numpy_corr_matrix[i_index, j_index]
+
                 for i_sample in range(pdf.funcList().size()):
                     sample_yield = ROOT.RooProduct("tmp", "tmp", [pdf.funcList()[i_sample], pdf.coefList()[i_sample]])
+                    yields[i_bin] += bin_width * sample_yield.getVal()
                     if i_sample in sample_values:
                         sample_values[i_sample] += [bin_width * sample_yield.getVal()]
                     else:
                         sample_values[i_sample] = [bin_width * sample_yield.getVal()]
-                    yields[i_bin] += bin_width * sample_yield.getVal()
 
-                yields_uncert[i_bin] = pdf.getPropagatedError(result, observables) * total_events * bin_width
+                    for j_parameter, par in enumerate(required_params):
+                        
+                        cen_val = par.getVal()
+                        par_err = par.getError()
+
+                        par.setVal(cen_val + par_err)
+                        par_upper_variation = sample_yield.getVal(observables)
+                        par.setVal(cen_val - par_err)
+                        par_bottom_variation = sample_yield.getVal(observables)
+
+
+                        par.setVal(cen_val)
+                        sample_yield.getVal(observables)
+
+                        fill_array[i_sample, j_parameter] = (par_upper_variation - par_bottom_variation) / 2
+
+                total_uncertanties_per_variation = np.sum(fill_array, axis=0)
+
+                total_uncertainty = np.dot(total_uncertanties_per_variation, np.dot(numpy_corr_matrix, total_uncertanties_per_variation))
+
+                yields_uncert[i_bin] = np.sqrt(total_uncertainty) * bin_width
                 
         return yields, yields_uncert, sample_values
     
-    def Draw(self, result):
+    def get_yields_no_fit(self, variable, observables, pdf, result):
+        """Also get uncertainties if you pass a fit result.
+        """
+        yields = np.zeros(variable.numBins())
+        yields_uncert = np.zeros(variable.numBins())
+        sample_values = {}
+        for i_bin in range(variable.numBins()):
+            variable.setBin(i_bin)
+            bin_width = variable.getBinWidth(i_bin)
+
+            all_pdf_params = pdf.getParameters(observables)
+
+            fit_result_params = result.floatParsFinal()
+
+            required_params = all_pdf_params
+
+            fill_array = np.zeros((pdf.funcList().size(), len(required_params)))
+
+            number_of_parameters = len(required_params)
+
+            parameters_indices_map = {}
+            parameters_for_cov_matrix = []
+
+            internal_index = 0
+            for i_index, par in enumerate(required_params):
+                par_index = fit_result_params.index(fit_result_params.find(par.GetName()))
+                if (par_index == -1): continue
+                parameters_indices_map[i_index] = internal_index
+                internal_index += 1
+                parameter_to_be_copied = fit_result_params[par_index]
+                par.setVal(parameter_to_be_copied.getVal())
+                par.setError(parameter_to_be_copied.getError())
+                parameters_for_cov_matrix += [parameter_to_be_copied]
+
+            corr_matrix = result.reducedCovarianceMatrix(parameters_for_cov_matrix)
+
+            numpy_corr_matrix = np.zeros((number_of_parameters, number_of_parameters))
+
+            for i_index in range(number_of_parameters):
+                for j_index in range(i_index, number_of_parameters):
+                    if i_index in parameters_indices_map and j_index in parameters_indices_map:
+                        numpy_corr_matrix[i_index, j_index] = corr_matrix[parameters_indices_map[i_index], parameters_indices_map[j_index]] / \
+                            np.sqrt(corr_matrix[parameters_indices_map[i_index], parameters_indices_map[i_index]] * corr_matrix[parameters_indices_map[j_index], parameters_indices_map[j_index]])
+                        numpy_corr_matrix[j_index, i_index] = numpy_corr_matrix[i_index, j_index]
+                    else:
+                        numpy_corr_matrix[i_index, j_index] = int(i_index == j_index)
+
+            for i_sample in range(pdf.funcList().size()):
+                sample_yield = ROOT.RooProduct("tmp", "tmp", [pdf.funcList()[i_sample], pdf.coefList()[i_sample]])
+                yields[i_bin] += bin_width * sample_yield.getVal()
+                if i_sample in sample_values:
+                    sample_values[i_sample] += [bin_width * sample_yield.getVal()]
+                else:
+                    sample_values[i_sample] = [bin_width * sample_yield.getVal()]
+
+                for j_parameter, par in enumerate(required_params):
+                    
+                    cen_val = par.getVal()
+                    par_err = par.getError()
+
+                    par.setVal(cen_val + par_err)
+                    par_upper_variation = sample_yield.getVal(observables)
+                    par.setVal(cen_val - par_err)
+                    par_bottom_variation = sample_yield.getVal(observables)
+
+
+                    par.setVal(cen_val)
+                    sample_yield.getVal(observables)
+
+                    fill_array[i_sample, j_parameter] = (par_upper_variation - par_bottom_variation) / 2
+
+            total_uncertanties_per_variation = np.sum(fill_array, axis=0)
+
+            total_uncertainty = np.dot(total_uncertanties_per_variation, np.dot(numpy_corr_matrix, total_uncertanties_per_variation))
+
+            yields_uncert[i_bin] = np.sqrt(total_uncertainty) * bin_width
+                
+        return yields, yields_uncert, sample_values
+    
+    def Draw(self, result, no_fit = False):
         for channel in self.meas.GetChannels():
             channel_pdf = self.ws[str(channel.GetName()) + "_model"]
             obs_var = self.ws["obs_x_" + str(channel.GetName())]
@@ -647,7 +755,7 @@ class DrawModel:
                 self.bias_graphs[-1].SetPoint(i - 1, data_histogram.GetBinCenter(i),  data_value / original_value)
                 error_boxes_prefit += [ROOT.TBox(leftEdge, down_value, rightEdge, up_value)]
 
-                print(leftEdge, down_value, rightEdge, up_value)
+                # print(leftEdge, down_value, rightEdge, up_value)
 
                 error_boxes_prefit[-1].SetFillStyle(3004)
                 error_boxes_prefit[-1].SetFillColor(ROOT.kGray + 3)
@@ -673,7 +781,10 @@ class DrawModel:
 
             # bookkeep prefit yields
 
-            postfit_yields, postfit_yields_uncert, postfit_sample_values = self.get_yields(obs_var, observables, channel_pdf, result, False)
+            if no_fit:
+                postfit_yields, postfit_yields_uncert, postfit_sample_values = self.get_yields_no_fit(obs_var, observables, channel_pdf, result)
+            else:
+                postfit_yields, postfit_yields_uncert, postfit_sample_values = self.get_yields(obs_var, observables, channel_pdf, result, False)
 
             self.second_hs_stacks += [ROOT.THStack("fitted stack", "fitted stack")]
 
@@ -681,7 +792,7 @@ class DrawModel:
             color_number = 0
 
             for postfit in postfit_sample_values:
-                temp_histo = ROOT.TH1F("afterfit" + str(postfit), "afterfit" + str(postfit), len(postfit_yields), minimal_bin_value, maximum_bin_value)
+                temp_histo = ROOT.TH1F(channel_name + "afterfit" + str(postfit), channel_name + "afterfit" + str(postfit), len(postfit_yields), minimal_bin_value, maximum_bin_value)
                 temp_histo.SetFillColor(self.predefined_colors[color_number])
                 color_number += 1
                 bin_index = 1
