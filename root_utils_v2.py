@@ -337,7 +337,7 @@ def MuteTool():
 
 
 class Visualization:
-    def CreateAndSavePicture(self, filename, fWorkspace):
+    def CreateAndSaveResultsPicture(self, filename, fWorkspace):
         # std::vector<TString> names;
         # std::vector<double> values;
         # std::vector<double> errors;
@@ -433,6 +433,66 @@ class Visualization:
 
         c1.SaveAs(filename);
         c1.Draw();
+
+    def DrawCorrelationMatrix(self, filename, result):
+        final_parameters = result.floatParsFinal()
+        corr_matrix_before = result.correlationMatrix()
+
+        number_of_inter_params = 0
+
+        for i in range(len(final_parameters)):
+            par = final_parameters.at(i)
+            if "gamma" in par.GetName():
+                continue
+
+            number_of_inter_params += 1
+
+        name = "CorrelationMatrix for fit results"
+
+        n = corr_matrix_before.GetNcols()
+
+        hh = ROOT.TH2D(name, name, number_of_inter_params, 0, number_of_inter_params, number_of_inter_params, 0, number_of_inter_params)
+
+        internal_index = 0
+        for i in range(n):
+
+            par = final_parameters.at(i)
+            if "gamma" in par.GetName():
+                continue
+            
+            internal__internal_index = 0
+            for j in range(n):
+                par = final_parameters.at(j)
+                if "gamma" in par.GetName():
+                    continue
+                hh.Fill(internal_index + 0.5, number_of_inter_params - internal__internal_index - 0.5, corr_matrix_before[i][j])
+                internal__internal_index += 1    
+
+            if par.GetName() == "tt_norm":
+                print(i)
+
+            hh.GetXaxis().SetBinLabel(internal_index + 1, final_parameters[i].GetName().split("alpha_")[-1])
+            hh.GetYaxis().SetBinLabel(number_of_inter_params - internal_index, final_parameters[i].GetName().split("alpha_")[-1])
+            internal_index += 1
+
+        hh.SetMinimum(-1)
+        hh.SetMaximum(+1)
+
+
+        c = ROOT.TCanvas("c", "Canvas", number_of_inter_params * 100, number_of_inter_params * 60)
+        hh.Draw("COLZ")
+        hh.SetStats(0)
+
+        ROOT.gStyle.SetPalette(87)
+        palette = hh.GetListOfFunctions().FindObject("palette")
+        if palette:
+            palette.SetX1NDC(0.1)  # Adjust palette position
+            palette.SetX2NDC(0.3)  # Adjust palette position
+
+        # Show the canvas
+        c.SaveAs(filename);
+        c.Draw()
+
 
         
 class DrawModel:
