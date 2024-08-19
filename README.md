@@ -1,4 +1,4 @@
 # ROOT AGC Update
 
 ### How to run:
-`main.ipynb` is not working for now. Temporary `fiy.py`
+`additional_validation_histograms.ipynb` can be used after running `main.ipynb`, since result file is required to run notebook.
