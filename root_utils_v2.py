@@ -1,21 +1,23 @@
 import ROOT
 import math
 import numpy as np
+
+
+
 class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
+    """
+    class created to cover extra functions, which are implemented in cabinetry, but missed in cabinetry
+    """
     def __init__(self, name, histo_name, histo_file, histo_path = ""):
         ROOT.RooStats.HistFactory.Sample.__init__(self, name, histo_name, histo_file, histo_path)
-        self.output_path = 'data/HistFactoryExtra.root'
-        self.fInputFile = ""
+        self.output_path = 'data/HistFactoryExtra.root' # since ROOT need to collect histogram from file at some point, we store created histograms in additional file
+                                                        # probably can be changed in next ROOT releases -> histograms can be stored just in RAM
+        self.fInputFile = ""    # default input file for all systematics
 
-    def __del__(self):
-        # Custom cleanup code here
-        pass
-        # print(f"AGC_Sample instance {self.GetName()} is being destroyed")
-
-    def SetSystematicsInputFile(self, file):
+    def SetSystematicsInputFile(self, file): # set same input file for all provided systematics: HistoSysm, HistoFactor, NormPlusShape
         self.fInputFile = file
 
-    def AddHistoSys(self, name, histoname_up = None, histofile_up = None, histopath_up = "",
+    def AddHistoSys(self, name, histoname_up = None, histofile_up = None, histopath_up = "", # overrided function, allowing not to provide additional input file
                     histoname_down = None, histofile_down = None, histopath_down = ""):
         
         histSys = ROOT.RooStats.HistFactory.HistoSys()
@@ -35,7 +37,7 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
 
         self.GetHistoSysList().push_back(histSys)
 
-    def AddHistoFactor(self, name, histoname_up = None, histofile_up = None, histopath_up = "",
+    def AddHistoFactor(self, name, histoname_up = None, histofile_up = None, histopath_up = "", # overrided function, allowing not to provide additional input file
                     histoname_down = None, histofile_down = None, histopath_down = ""):
         
         histFactor = ROOT.RooStats.HistFactory.HistoFactor()
@@ -55,7 +57,7 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
 
         self.GetHistoFactorList().push_back(histFactor)
 
-    def AddShapeSys(self, name, constraint_type = None, histoname = None, histofile = None, histopath = ""):
+    def AddShapeSys(self, name, constraint_type = None, histoname = None, histofile = None, histopath = ""): # overrided function, allowing not to provide additional input file
         
         shapeSys = ROOT.RooStats.HistFactory.ShapeSys()
 
@@ -73,7 +75,7 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
 
 
 
-    def AddNormPlusShapeHistoSys(self, name, histoname_up = None, histofile_up = None, histopath_up = "",
+    def AddNormPlusShapeHistoSys(self, name, histoname_up = None, histofile_up = None, histopath_up = "", # check more here:
                                  histoname_down = None, histofile_down = None, histopath_down = ""):
         if histofile_up is None:
             histofile_up = self.fInputFile
@@ -86,8 +88,12 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
             self.NonSymmetrize_AddNormPlusShapeHistoSys(name, histoname_up, histofile_up, histopath_up,
                                  histoname_down, histofile_down, histopath_down)
             
-    def Symmetrize_AddNormPlusShapeHistoSys(self, name, histoname, histofile, histopath):
-        
+    def Symmetrize_AddNormPlusShapeHistoSys(self, name, histoname, histofile, histopath): 
+        """
+        first symmertrize histogram -> calculate overallsys -> save all to sample
+        check more here:
+
+        """
         channel_name = str(histoname.split("_")[0])
 
         file = ROOT.TFile(histofile, "READ")
@@ -112,9 +118,6 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
         hist_up_name  = str(channel_name + "_" + str(self.GetName()) + "_" + name  + "_norm_plus_shape_up")
         hist_down_name = str(channel_name + "_" + str(self.GetName()) + "_" + name  + "_norm_plus_shape_down")
 
-        # print(h_down)
-        # print(h_new)
-
         h_new.Write(hist_up_name)
         h_down.Write(hist_down_name)
 
@@ -123,7 +126,6 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
         histSys = ROOT.RooStats.HistFactory.HistoSys()
 
         histSys.SetName(name)
-        # histSys.SetHistoName(self.GetselfName())
         histSys.SetHistoPathHigh("")
         histSys.SetHistoPathLow("")
 
@@ -172,9 +174,6 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
         hist_up_name  = str(channel_name + "_" + str(self.GetName()) + "_" + name  + "_norm_plus_shape_up")
         hist_down_name = str(channel_name + "_" + str(self.GetName()) + "_" + name  + "_norm_plus_shape_down")
 
-        # print(h_new_down)
-        # print(h_new_up)
-
         h_new_up.Write(hist_up_name)
         h_new_down.Write(hist_down_name)
 
@@ -183,7 +182,6 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
         histSys = ROOT.RooStats.HistFactory.HistoSys()
 
         histSys.SetName(name)
-        # histSys.SetHistoName(self.GetselfName())
         histSys.SetHistoPathHigh("")
         histSys.SetHistoPathLow("")
 
@@ -202,10 +200,24 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
         self.GetOverallSysList().push_back(overallSys)
 
 
-        # hist_nominal = self.Get
+class RebinningTool: 
+    """
+    Rebinning tool, which can be used for rebinning and cutting edges
+    Save histograms to new .root file, which have structure as input one
 
+    set_xmin: set lower edge for all histograms
+    set_xmax: set upper edge for all histograms
+    set_rebin: set rebin coefficient
 
-class RebinningTool:
+    example of usage: 
+
+    rebinning_tool = RebinningTool() 
+    rebinning_tool.set_xmin(110) # if xmax was not set -> keep original one
+    rebinning_tool.set_rebin(2)
+    rebinning_tool.set_input_path("data/histograms.root")
+    rebinning_tool.set_output_path("data/temp_histos.root")
+    rebinning_tool.apply_rebinning()
+    """
 
     def __init__(self):
         self.fHistoBinLow = None
@@ -224,7 +236,6 @@ class RebinningTool:
         self.fRebin = rebin
 
     def list_histograms(self, directory, path=""):
-    # Get the list of keys in the directory
         keys = directory.GetListOfKeys()
 
         # Loop over all keys
@@ -266,19 +277,13 @@ class RebinningTool:
         assert_check_left = (left_edge - original.GetXaxis().GetXmin()) / original_bin_width
         assert_check_right = (original.GetXaxis().GetXmax() - right_edge) / original_bin_width
 
-        # print(f"fHistoBinLow: {left_edge}")
-        # print(f"fHistoBinHigh: {right_edge}")
-        # print(f"original_bin_width: {original_bin_width}")
-
         if not self.is_integer(assert_check_left) or not self.is_integer(assert_check_right):
             print("Error: The left_edge and right_edge are not multiples of the original bin width")
             return original
 
         number_of_remove_bins = ((left_edge - original.GetXaxis().GetXmin()) + 
                                  (original.GetXaxis().GetXmax() - right_edge)) / original_bin_width
-        # print(f"number of remove bins: {number_of_remove_bins}")
         new_nbins = int(original.GetNbinsX() - number_of_remove_bins)
-        # print(f"new_nbins: {new_nbins // self.fRebin}")
         
         original_new = ROOT.TH1F(original.GetName() + "temp_rebin_clone", original.GetTitle(), new_nbins, left_edge, right_edge)
         skipped_bins_left = int((left_edge - original.GetXaxis().GetXmin()) / original_bin_width)
@@ -338,9 +343,6 @@ def MuteTool():
 
 class Visualization:
     def CreateAndSaveResultsPicture(self, filename, fWorkspace):
-        # std::vector<TString> names;
-        # std::vector<double> values;
-        # std::vector<double> errors;
         names = []
         values = []
         errors = []
@@ -361,57 +363,48 @@ class Visualization:
         self.c1 =  ROOT.TCanvas("c1", "c1", 1200, 600)
         self.c1.SetLeftMargin(0.2);
 
-        
-
         self.frame =  ROOT.TH2F("self.frame", "", 6, -3, 3, num, 0, num);
-
 
         self.frame.Draw("");
 
-
-        self.box = ROOT.TBox(-2, 0, 2, num);
+        self.box = ROOT.TBox(-2, 0, 2, num); # external yellow box, which represent 2 sigma deviation
         self.box.SetFillColorAlpha(ROOT.kYellow - 9, 0.8);
         self.box.Draw("same A");
 
-        self.box_internal = ROOT.TBox(-1, 0, 1, num);
+        self.box_internal = ROOT.TBox(-1, 0, 1, num); # internal green box, which represent 1 sigma deviation
         self.box_internal.SetFillColorAlpha(ROOT.kGreen, 0.5);
         self.box_internal.Draw("same A");
 
-        self.axis = ROOT.TGaxis(-3, num, 3, num,-3, 3, 510,"-");
-        self.xaxis = ROOT.TGaxis(3, 0, 3, num, 0, num, num ,"+S");
+        self.axis = ROOT.TGaxis(-3, num, 3, num,-3, 3, 510,"-") # left Y axis, which used for naming parameters
 
-        self.frame.GetYaxis().SetTickLength(0.);
-        self.xaxis.SetTickLength(0.);
-
-        # // self.frame.Draw("X+");
+        self.frame.GetYaxis().SetTickLength(0.) # set default axis ticks to 0 -> they will be overwritten by manually created ones
 
         self.graph = ROOT.TGraph();
         self.lines = []
         self.right_ticks = []
         self.left_ticks = []
 
-        # for (int i = 0; i < num; ++i)
         for i in range(num):
             self.graph.SetPoint(i,  values[i], i + 0.5);
             self.frame.GetYaxis().SetBinLabel(i + 1, names[i]);
 
-            self.lines += [ROOT.TLine(values[i] - errors[i], i + 0.5, values[i] + errors[i], i + 0.5)]
+            self.lines += [ROOT.TLine(values[i] - errors[i], i + 0.5, values[i] + errors[i], i + 0.5)] # line which represent parameter error
             self.lines[-1].SetLineColor(ROOT.kBlack);
             self.lines[-1].SetLineWidth(2);
             self.lines[-1].Draw();
 
-            self.left_ticks += [ROOT.TLine(-3, i + 0.5, -2.95, i + 0.5)]
+            self.left_ticks += [ROOT.TLine(-3, i + 0.5, -2.95, i + 0.5)] # left tick, paralel to parameter error line
             self.left_ticks[-1].SetLineColor(ROOT.kBlack);
             self.left_ticks[-1].SetLineWidth(1);
             self.left_ticks[-1].Draw();
 
-            self.right_ticks += [ROOT.TLine(2.95, i + 0.5, 3, i + 0.5)]
+            self.right_ticks += [ROOT.TLine(2.95, i + 0.5, 3, i + 0.5)] # right tick, paralel to parameter error line
             self.right_ticks[-1].SetLineColor(ROOT.kBlack);
             self.right_ticks[-1].SetLineWidth(1);
             self.right_ticks[-1].Draw();
 
 
-        self.tl = ROOT.TLine(0, 0, 0, num);
+        self.tl = ROOT.TLine(0, 0, 0, num); 
         self.tl.SetLineStyle(2);
         self.tl.Draw();
 
@@ -426,9 +419,6 @@ class Visualization:
         self.axis.SetLabelSize(0.0);
         self.axis.Draw();
 
-        self.xaxis.SetLabelSize(0.0);
-        self.xaxis.Draw();
-
         ROOT.gPad.RedrawAxis(); 
 
         self.c1.SaveAs(filename);
@@ -442,7 +432,7 @@ class Visualization:
 
         for i in range(len(final_parameters)):
             par = final_parameters.at(i)
-            if "gamma" in par.GetName():
+            if "gamma" in par.GetName(): # skip parameters for bins stat error
                 continue
 
             number_of_inter_params += 1
@@ -478,7 +468,6 @@ class Visualization:
         self.hh.SetMinimum(-1)
         self.hh.SetMaximum(+1)
 
-
         self.c = ROOT.TCanvas("self.c", "Canvas", number_of_inter_params * 100, number_of_inter_params * 60)
         self.hh.Draw("COLZ")
         self.hh.SetStats(0)
@@ -489,7 +478,6 @@ class Visualization:
             palette.SetX1NDC(0.1)  # Adjust palette position
             palette.SetX2NDC(0.3)  # Adjust palette position
 
-        # Show the canvas
         self.c.SaveAs(filename);
         self.c.Draw()
 
@@ -498,16 +486,16 @@ class Visualization:
 class DrawModel:
 
     predefined_colors = [
-        ROOT.TColor.GetColor("#3F90DA"),  # Light Red
-        ROOT.TColor.GetColor("#FFA90E"),  # Light Blue
-        ROOT.TColor.GetColor("#BD1F01"),  # Light Green
-        ROOT.TColor.GetColor("#94A4A2"),  # Light Magenta
-        ROOT.TColor.GetColor("#832DB6"),  # Light Cyan
-        ROOT.TColor.GetColor("#A96B59"),  # Light Yellow
-        ROOT.TColor.GetColor("#E76300"),  # Light Orange
-        ROOT.TColor.GetColor("#B9AC70"),  # Light Pink
-        ROOT.TColor.GetColor("#717581"),  # Light Teal
-        ROOT.TColor.GetColor("#92DADD"),  # Light Spring Green
+        ROOT.TColor.GetColor("#3F90DA"),  
+        ROOT.TColor.GetColor("#FFA90E"), 
+        ROOT.TColor.GetColor("#BD1F01"), 
+        ROOT.TColor.GetColor("#94A4A2"),  
+        ROOT.TColor.GetColor("#832DB6"),  
+        ROOT.TColor.GetColor("#A96B59"),
+        ROOT.TColor.GetColor("#E76300"),  
+        ROOT.TColor.GetColor("#B9AC70"),  
+        ROOT.TColor.GetColor("#717581"),  
+        ROOT.TColor.GetColor("#92DADD"),  
 
         ROOT.TColor.GetColor("#D0E1F9"),  # Light Azure
         ROOT.TColor.GetColor("#E3D6F1"),  # Light Violet
@@ -537,8 +525,7 @@ class DrawModel:
         self.error_pre_graphs = []
 
     def get_yields(self, variable, observables, pdf, result, prefit = False):
-        """Also get uncertainties if you pass a fit result.
-        """
+
         yields = np.zeros(variable.numBins())
         yields_uncert = np.zeros(variable.numBins())
         sample_values = {}
@@ -546,89 +533,93 @@ class DrawModel:
             variable.setBin(i_bin)
             bin_width = variable.getBinWidth(i_bin)
 
-            if prefit:
-                fill_array = np.zeros((pdf.funcList().size(), len(pdf.getParameters(observables))))
-                all_params = pdf.getParameters(observables)
-                param_values = result.floatParsInit()
+            if prefit: # for prefit original parameters values 
+                fill_array = np.zeros((pdf.funcList().size(), len(pdf.getParameters(observables)))) 
+                all_params = pdf.getParameters(observables) # get parameters, which required only for interested pdf
+                param_values = result.floatParsInit() # original parameters values
 
                 for i_sample in range(pdf.funcList().size()):
-                    sample_yield = ROOT.RooProduct("tmp", "tmp", [pdf.funcList()[i_sample], pdf.coefList()[i_sample]])
+                    sample_yield = ROOT.RooProduct("tmp", "tmp", [pdf.funcList()[i_sample], pdf.coefList()[i_sample]]) # get sample from pdf
+
+                    yields[i_bin] += bin_width * sample_yield.getVal() # get total bin content per bin
+                    if i_sample in sample_values:
+                        sample_values[i_sample] += [bin_width * sample_yield.getVal()] # get value for each sample per bin
+                    else:
+                        sample_values[i_sample] = [bin_width * sample_yield.getVal()]
 
                     for j_parameter, par in enumerate(all_params):
                         
                         name = par.GetName()
 
-                        original_ind = param_values.index(param_values.find(name))
+                        original_ind = param_values.index(param_values.find(name)) # index of parameter from pdf in original parameters array
 
-                        postfit_cen_val = par.getVal()
-                        cen_val = param_values[original_ind].getVal()
-                        par_err = param_values[original_ind].getError()
+                        postfit_cen_val = par.getVal() # saving postfit value to restore it after all calculations
+                        cen_val = param_values[original_ind].getVal() # getting original value for parameter 
+                        par_err = param_values[original_ind].getError() # getting original error for parameter
 
-                        par.setVal(cen_val + par_err)
-                        par_upper_variation = sample_yield.getVal(observables)
+                        par.setVal(cen_val + par_err) 
+                        par_upper_variation = sample_yield.getVal(observables) # get upper variation for sample
                         par.setVal(cen_val - par_err)
-                        par_bottom_variation = sample_yield.getVal(observables)
+                        par_bottom_variation = sample_yield.getVal(observables) # get lower variation for sample
 
-                        par.setVal(postfit_cen_val)
+                        par.setVal(postfit_cen_val) # restore postfit value
 
                         fill_array[i_sample, j_parameter] = (par_upper_variation - par_bottom_variation) / 2
 
-                total_uncertanties_per_variation = np.sum(fill_array, axis=0)
-                total_uncertainty = np.sum(np.power(total_uncertanties_per_variation, 2), axis=0)
-                yields_uncert[i_bin] = np.sqrt(total_uncertainty) * bin_width        
+                total_uncertanties_per_variation = np.sum(fill_array, axis=0) # sum by 0 axis to get total uncertainty per variation
+                total_uncertainty = np.sum(np.power(total_uncertanties_per_variation, 2), axis=0) # for postfit covariance matrix = identity matrix, so code be bit simplified
+                yields_uncert[i_bin] = np.sqrt(total_uncertainty) * bin_width   # original values is normalized -> multiply by bin width
 
             else:
                 all_pdf_params = pdf.getParameters(observables)
 
-                required_params = [i for i in all_pdf_params if i.getError() > 0.001]
+                required_params = [i for i in all_pdf_params if i.getError() > 0.001] # get only non zero parameters
 
                 fill_array = np.zeros((pdf.funcList().size(), len(required_params)))
 
                 number_of_parameters = len(required_params)
-                corr_matrix = result.reducedCovarianceMatrix(required_params)
+                cov_matrix = result.reducedCovarianceMatrix(required_params) # reduced covariance matrix for only non 0 parameters
 
-                numpy_corr_matrix = np.zeros((number_of_parameters, number_of_parameters))
+                numpy_cov_matrix = np.zeros((number_of_parameters, number_of_parameters))
 
-                for i_index in range(number_of_parameters):
+                for i_index in range(number_of_parameters): # fill and normalize numpy covariance matrix
                     for j_index in range(i_index, number_of_parameters):
-                        numpy_corr_matrix[i_index, j_index] = corr_matrix[i_index, j_index] / np.sqrt(corr_matrix[i_index, i_index] * corr_matrix[j_index, j_index])
-                        numpy_corr_matrix[j_index, i_index] = numpy_corr_matrix[i_index, j_index]
+                        numpy_cov_matrix[i_index, j_index] = cov_matrix[i_index, j_index] / np.sqrt(cov_matrix[i_index, i_index] * cov_matrix[j_index, j_index])
+                        numpy_cov_matrix[j_index, i_index] = numpy_cov_matrix[i_index, j_index]
 
                 for i_sample in range(pdf.funcList().size()):
-                    sample_yield = ROOT.RooProduct("tmp", "tmp", [pdf.funcList()[i_sample], pdf.coefList()[i_sample]])
-                    yields[i_bin] += bin_width * sample_yield.getVal()
+                    sample_yield = ROOT.RooProduct("tmp", "tmp", [pdf.funcList()[i_sample], pdf.coefList()[i_sample]]) # get sample from pdf
+                    yields[i_bin] += bin_width * sample_yield.getVal() # get total bin content per bin
                     if i_sample in sample_values:
-                        sample_values[i_sample] += [bin_width * sample_yield.getVal()]
+                        sample_values[i_sample] += [bin_width * sample_yield.getVal()] # get value for each sample per bin
                     else:
                         sample_values[i_sample] = [bin_width * sample_yield.getVal()]
 
                     for j_parameter, par in enumerate(required_params):
                         
-                        cen_val = par.getVal()
-                        par_err = par.getError()
+                        cen_val = par.getVal() # getting postfit parameter value
+                        par_err = par.getError() # getting postfit parameter error
 
-                        par.setVal(cen_val + par_err)
-                        par_upper_variation = sample_yield.getVal(observables)
+                        par.setVal(cen_val + par_err) 
+                        par_upper_variation = sample_yield.getVal(observables) # getting upper variation
                         par.setVal(cen_val - par_err)
-                        par_bottom_variation = sample_yield.getVal(observables)
+                        par_bottom_variation = sample_yield.getVal(observables) # getting lower variation
 
 
-                        par.setVal(cen_val)
-                        sample_yield.getVal(observables)
+                        par.setVal(cen_val) # restore postfit value
+                        sample_yield.getVal(observables) 
 
                         fill_array[i_sample, j_parameter] = (par_upper_variation - par_bottom_variation) / 2
 
-                total_uncertanties_per_variation = np.sum(fill_array, axis=0)
+                total_uncertanties_per_variation = np.sum(fill_array, axis=0) # sum by 0 axis to get total uncertainty per variation
 
-                total_uncertainty = np.dot(total_uncertanties_per_variation, np.dot(numpy_corr_matrix, total_uncertanties_per_variation))
+                total_uncertainty = np.dot(total_uncertanties_per_variation, np.dot(numpy_cov_matrix, total_uncertanties_per_variation)) # F * (C * F)
 
                 yields_uncert[i_bin] = np.sqrt(total_uncertainty) * bin_width
                 
         return yields, yields_uncert, sample_values
     
-    def get_yields_no_fit(self, variable, observables, pdf, result):
-        """Also get uncertainties if you pass a fit result.
-        """
+    def get_yields_no_fit(self, variable, observables, pdf, result): # for extra variables and not fit
         yields = np.zeros(variable.numBins())
         yields_uncert = np.zeros(variable.numBins())
         sample_values = {}
@@ -636,11 +627,9 @@ class DrawModel:
             variable.setBin(i_bin)
             bin_width = variable.getBinWidth(i_bin)
 
-            all_pdf_params = pdf.getParameters(observables)
+            required_params = pdf.getParameters(observables) # get all parameters required for uncertainty calculation
 
-            fit_result_params = result.floatParsFinal()
-
-            required_params = all_pdf_params
+            fit_result_params = result.floatParsFinal() # postfit parameters_values
 
             fill_array = np.zeros((pdf.funcList().size(), len(required_params)))
 
@@ -650,30 +639,45 @@ class DrawModel:
             parameters_for_cov_matrix = []
 
             internal_index = 0
-            for i_index, par in enumerate(required_params):
+            for i_index, par in enumerate(required_params): # loop over new pdf parameters and setting their values to postfit parameters values
                 par_index = fit_result_params.index(fit_result_params.find(par.GetName()))
                 if (par_index == -1): continue
-                parameters_indices_map[i_index] = internal_index
+                parameters_indices_map[i_index] = internal_index # internal index for copying covariance matrix
                 internal_index += 1
                 parameter_to_be_copied = fit_result_params[par_index]
                 par.setVal(parameter_to_be_copied.getVal())
                 par.setError(parameter_to_be_copied.getError())
-                parameters_for_cov_matrix += [parameter_to_be_copied]
+                parameters_for_cov_matrix += [parameter_to_be_copied] # save parameters to list to get reduced Covariance martix
 
-            corr_matrix = result.reducedCovarianceMatrix(parameters_for_cov_matrix)
+            cov_matrix = result.reducedCovarianceMatrix(parameters_for_cov_matrix)
 
-            numpy_corr_matrix = np.zeros((number_of_parameters, number_of_parameters))
+            numpy_cov_matrix = np.zeros((number_of_parameters, number_of_parameters))
 
-            for i_index in range(number_of_parameters):
+            for i_index in range(number_of_parameters): # filling covariance matrix using values from postfit covariance matrix.
                 for j_index in range(i_index, number_of_parameters):
-                    if i_index in parameters_indices_map and j_index in parameters_indices_map:
-                        numpy_corr_matrix[i_index, j_index] = corr_matrix[parameters_indices_map[i_index], parameters_indices_map[j_index]] / \
-                            np.sqrt(corr_matrix[parameters_indices_map[i_index], parameters_indices_map[i_index]] * corr_matrix[parameters_indices_map[j_index], parameters_indices_map[j_index]])
-                        numpy_corr_matrix[j_index, i_index] = numpy_corr_matrix[i_index, j_index]
-                    else:
-                        numpy_corr_matrix[i_index, j_index] = int(i_index == j_index)
+                    if i_index in parameters_indices_map and j_index in parameters_indices_map: # if both parameters in row and column existing in postfit results -> copy and normalize
+                        numpy_cov_matrix[i_index, j_index] = cov_matrix[parameters_indices_map[i_index], parameters_indices_map[j_index]] / \
+                            np.sqrt(cov_matrix[parameters_indices_map[i_index], parameters_indices_map[i_index]] * cov_matrix[parameters_indices_map[j_index], parameters_indices_map[j_index]])
+                        numpy_cov_matrix[j_index, i_index] = numpy_cov_matrix[i_index, j_index]
+                    else: # if at least one parameter was not presented in postfit results
+                        numpy_cov_matrix[i_index, j_index] = int(i_index == j_index) 
 
-            for i_sample in range(pdf.funcList().size()):
+            """
+            expected view of covariance matrix after copying:
+            var1, var2, var3 was presented in postfit results
+            var4, var5 are new parameters (mostly are stat errors for bins)
+
+                    var1    var2    var3    var4    var5
+            var1    1       non0    non0    0       0
+            var2    non0    1       non0    0       0
+            var3    non0    non0    1       0       0
+            var4    0       0       0       1       0
+            var5    0       0       0       0       1
+
+
+            """
+
+            for i_sample in range(pdf.funcList().size()): # same as default one
                 sample_yield = ROOT.RooProduct("tmp", "tmp", [pdf.funcList()[i_sample], pdf.coefList()[i_sample]])
                 yields[i_bin] += bin_width * sample_yield.getVal()
                 if i_sample in sample_values:
@@ -699,7 +703,7 @@ class DrawModel:
 
             total_uncertanties_per_variation = np.sum(fill_array, axis=0)
 
-            total_uncertainty = np.dot(total_uncertanties_per_variation, np.dot(numpy_corr_matrix, total_uncertanties_per_variation))
+            total_uncertainty = np.dot(total_uncertanties_per_variation, np.dot(numpy_cov_matrix, total_uncertanties_per_variation))
 
             yields_uncert[i_bin] = np.sqrt(total_uncertainty) * bin_width
                 
@@ -715,8 +719,8 @@ class DrawModel:
             obs_var = self.ws["obs_x_" + str(channel.GetName())]
             observables = ROOT.RooArgSet(obs_var)
 
-            
-            divide_value = 0.3
+            divide_value = 0.3 # divide canvas into 4 pads: prefit histogram, postfit histogram, prefit data/bin_value, postfit data/bin_value
+
             self.cv_array += [ROOT.TCanvas("canvas" +  str(channel.GetName()), "canvas" +  str(channel.GetName()), 1500, 600)]
             pad1_upper = ROOT.TPad("pad1_upper" + str(channel.GetName()), "pad1_upper" + str(channel.GetName()), 0, divide_value, 0.5, 1)
             pad1_upper.Draw()
@@ -729,16 +733,14 @@ class DrawModel:
             pad2_bottom.Draw()
             pad1_upper.cd()
 
-
-
-            prefit_yields, prefit_unc, prefit_sample_values = self.get_yields(obs_var, observables, channel_pdf, result, True)
+            prefit_yields, prefit_unc, prefit_sample_values = self.get_yields(obs_var, observables, channel_pdf, result, prefit = True) # get prefit uncert for histogram
 
             self.hs_stacks += [ROOT.THStack("hs" + str(channel.GetName()), "hs" + str(channel.GetName()))]
             sample_histograms = []
 
             original_sample_bin_values = [0] * channel.GetData().GetHisto().GetNbinsX()
 
-            for i, sample in enumerate(channel.GetSamples()):
+            for i, sample in enumerate(channel.GetSamples()): # loop over samples to get prefit histograms 
                 hist = sample.GetHisto()
                 hist.SetFillColor(self.predefined_colors[i])
                 hist.SetLineColor(ROOT.kBlack)
@@ -747,13 +749,13 @@ class DrawModel:
                 for i in range(hist.GetNbinsX()):
                     original_sample_bin_values[i] += hist.GetBinContent(i + 1)
 
-                self.hs_stacks[-1].Add(sample_histograms[-1])
+                self.hs_stacks[-1].Add(sample_histograms[-1]) # save histogram to THStack
 
             channel_name = "_".join(channel.GetName().split("_")[1:])
             self.hs_stacks[-1].SetTitle(channel_name + " PREFIT")
             self.hs_stacks[-1].Draw("hist")
 
-            maximum_y_val = ROOT.gPad.GetUymax()
+            maximum_y_val = ROOT.gPad.GetUymax() # used for moving upper limit of Y ax
 
             bin_index = 1
 
@@ -768,84 +770,64 @@ class DrawModel:
                 up_value = central_value + unc
 
                 if up_value > maximum_y_val:
-                    maximum_y_val = up_value
+                    maximum_y_val = up_value # if box are over upper limit -> we are goint to move upper limit after
 
-                self.boxes += [ROOT.TBox(leftEdge, down_value, rightEdge, up_value)]
-                self.boxes[-1].SetFillStyle(3004)
+                self.boxes += [ROOT.TBox(leftEdge, down_value, rightEdge, up_value)] # draw uncertainty box for each bin
+                self.boxes[-1].SetFillStyle(3004) 
                 self.boxes[-1].SetFillColor(ROOT.kGray + 3)
                 self.boxes[-1].Draw("same")
 
-            self.hs_stacks[-1].SetMaximum(1.1 * maximum_y_val)
+            self.hs_stacks[-1].SetMaximum(1.1 * maximum_y_val) # moving upper limit if required
 
-            self.data_histogram = channel.GetData().GetHisto()
-            self.data_histogram.SetStats(0)
-            self.data_histogram.SetMarkerStyle(3)
+            self.data_histogram = channel.GetData().GetHisto() # getting data histogram from channel data
+            self.data_histogram.SetStats(0) # remove extra text over histogram
+            self.data_histogram.SetMarkerStyle(3) # stylization
             self.data_histogram.SetMarkerSize(0.5)
 
             self.data_plots += [ROOT.TGraph()]
             for i in range(self.data_histogram.GetNbinsX()):
-                self.data_plots[-1].SetPoint(i, self.data_histogram.GetBinCenter(i + 1), self.data_histogram.GetBinContent(i + 1))
+                self.data_plots[-1].SetPoint(i, self.data_histogram.GetBinCenter(i + 1), self.data_histogram.GetBinContent(i + 1)) 
 
             self.data_plots[-1].SetMarkerStyle(8)
             self.data_plots[-1].SetMarkerSize(0.5)
-            self.data_plots[-1].Draw("same p")
-
+            self.data_plots[-1].Draw("same p") # draw TGraph instead of TH1F
 
             pad1_bottom.cd()
             number_of_bins = self.data_histogram.GetNbinsX()
-            self.bias_graphs += [ROOT.TGraph(number_of_bins)]
+            self.bias_graphs += [ROOT.TGraph(number_of_bins)] # TGraph which will be use to save data/bin_value data
             self.bias_graphs[-1].SetTitle("")
             self.bias_graphs[-1].SetMarkerSize(0.4)
             self.bias_graphs[-1].SetMarkerStyle(8)
             
-            for i in range(1, number_of_bins + 1):
+            for i in range(1, number_of_bins + 1): 
                 original_value = original_sample_bin_values[i - 1]
                 data_value = self.data_histogram.GetBinContent(i)
-                unc = prefit_unc[i - 1]
-                up_value = 1 + unc / (original_value)
-                down_value = 1 - unc / (original_value)
-
-                if down_value < 0.5:
-                    down_value = 0.5
-                if up_value > 1.5:
-                    up_value = 1.5
-
-                leftEdge = self.data_histogram.GetBinLowEdge(i)
-                binWidth = self.data_histogram.GetBinWidth(i)
-                rightEdge = leftEdge + binWidth
-
-                self.bias_graphs[-1].SetPoint(i - 1, self.data_histogram.GetBinCenter(i),  data_value / original_value)
+                self.bias_graphs[-1].SetPoint(i - 1, self.data_histogram.GetBinCenter(i),  data_value / original_value) 
 
             self.bias_graphs[-1].Draw("AP")
             
             for i in range(1, number_of_bins + 1):
                 original_value = original_sample_bin_values[i - 1]
-                data_value = self.data_histogram.GetBinContent(i)
                 unc = prefit_unc[i - 1]
                 up_value = 1 + unc / (original_value)
                 down_value = 1 - unc / (original_value)
 
-                if down_value < 0.5:
-                    down_value = 0.5
-                if up_value > 1.5:
+                if down_value < 0.5: # draw limits, by default in ROOT: if down_value << 0.5 -> box will not be drawn
+                    down_value = 0.5    # handle it manually
+                if up_value > 1.5:  # by default in ROOT: if up_value >> 1.5 -> box would not be drawn
                     up_value = 1.5
 
-                leftEdge = self.data_histogram.GetBinLowEdge(i)
+                leftEdge = self.data_histogram.GetBinLowEdge(i) # left edge of bin -> left edge of error box
                 binWidth = self.data_histogram.GetBinWidth(i)
-                rightEdge = leftEdge + binWidth
+                rightEdge = leftEdge + binWidth # right edge of bin -> right edge of error box
 
                 self.error_boxes_prefit += [ROOT.TBox(leftEdge, down_value, rightEdge, up_value)]
                 self.error_boxes_prefit[-1].SetFillStyle(3004)
                 self.error_boxes_prefit[-1].SetFillColor(ROOT.kGray + 3)
-                self.error_boxes_prefit[-1].Draw("same")
-
-
-            # for box in self.error_boxes_prefit:
-                # box.Draw("same")
+                self.error_boxes_prefit[-1].Draw("same") # drawing error boxes
 
             minimal_bin_value = self.data_histogram.GetBinLowEdge(1)
             maximum_bin_value = self.data_histogram.GetBinLowEdge(number_of_bins) + self.data_histogram.GetBinWidth(number_of_bins)
-
 
             self.bias_graphs[-1].GetYaxis().SetRangeUser(0.5, 1.5)
             self.bias_graphs[-1].GetXaxis().SetRangeUser(minimal_bin_value, maximum_bin_value)
@@ -853,20 +835,18 @@ class DrawModel:
             self.normal_lines += [ROOT.TLine(minimal_bin_value, 1, maximum_bin_value, 1)]
             self.normal_lines[-1].SetLineStyle(2)
             self.normal_lines[-1].SetLineWidth(1)
-            self.normal_lines[-1].Draw("same")
+            self.normal_lines[-1].Draw("same") # normal line, which represent data/bin_value = 1
 
-            pad2_upper.cd()
-
-            # bookkeep prefit yields
+            pad2_upper.cd() # same for postfit
 
             if no_fit:
-                postfit_yields, postfit_yields_uncert, postfit_sample_values = self.get_yields_no_fit(obs_var, observables, channel_pdf, result)
+                postfit_yields, postfit_yields_uncert, postfit_sample_values = self.get_yields_no_fit(obs_var, observables, channel_pdf, result) # if we do for extra workspaces -> use no_fit function 
+                                                                                                                                                    # which handle all parameters copying 
             else:
-                postfit_yields, postfit_yields_uncert, postfit_sample_values = self.get_yields(obs_var, observables, channel_pdf, result, False)
+                postfit_yields, postfit_yields_uncert, postfit_sample_values = self.get_yields(obs_var, observables, channel_pdf, result, prefit = False)
 
             self.second_hs_stacks += [ROOT.THStack("fitted stack", "fitted stack")]
 
-            # temp_histos
             color_number = 0
 
             for postfit in postfit_sample_values:
@@ -900,7 +880,6 @@ class DrawModel:
                 self.boxes[-1].SetFillColor(ROOT.kGray + 3)
                 self.boxes[-1].Draw("same")
 
-
             self.data_plots[-1].Draw("same p")
 
             self.bias_second_graphs += [ROOT.TGraph(number_of_bins)]
@@ -908,20 +887,11 @@ class DrawModel:
             self.bias_second_graphs[-1].SetMarkerSize(0.4)
             self.bias_second_graphs[-1].SetMarkerStyle(8)
 
-
-
             pad2_bottom.cd()
 
             for i in range(1, number_of_bins + 1):
                 original_value = postfit_yields[i - 1]
                 data_value = self.data_histogram.GetBinContent(i)
-                unc = postfit_yields_uncert[i - 1]
-                up_value = 1 + unc / (original_value)
-                down_value = 1 - unc / (original_value)
-
-                leftEdge = self.data_histogram.GetBinLowEdge(i)
-                binWidth = self.data_histogram.GetBinWidth(i)
-                rightEdge = leftEdge + binWidth
 
                 self.bias_second_graphs[-1].SetPoint(i - 1, self.data_histogram.GetBinCenter(i),  data_value / original_value)
 
@@ -929,7 +899,6 @@ class DrawModel:
 
             for i in range(1, number_of_bins + 1):
                 original_value = postfit_yields[i - 1]
-                data_value = self.data_histogram.GetBinContent(i)
                 unc = postfit_yields_uncert[i - 1]
                 up_value = 1 + unc / (original_value)
                 down_value = 1 - unc / (original_value)
@@ -943,11 +912,9 @@ class DrawModel:
                 self.error_boxes[-1].SetFillColor(ROOT.kGray + 3)
                 self.error_boxes[-1].Draw("same")
             
-
             
             minimal_bin_value = self.data_histogram.GetBinLowEdge(1)
             maximum_bin_value = self.data_histogram.GetBinLowEdge(number_of_bins) + self.data_histogram.GetBinWidth(number_of_bins)
-
 
             self.bias_second_graphs[-1].GetYaxis().SetRangeUser(0.5, 1.5)
             self.bias_second_graphs[-1].GetXaxis().SetRangeUser(minimal_bin_value, maximum_bin_value)
