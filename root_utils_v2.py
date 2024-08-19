@@ -358,81 +358,81 @@ class Visualization:
         num = len(names)
 
         ROOT.gStyle.SetPalette(1);
-        c1 =  ROOT.TCanvas("c1", "c1", 1200, 600)
-        c1.SetLeftMargin(0.2);
+        self.c1 =  ROOT.TCanvas("c1", "c1", 1200, 600)
+        self.c1.SetLeftMargin(0.2);
 
         
 
-        frame =  ROOT.TH2F("frame", "", 6, -3, 3, num, 0, num);
+        self.frame =  ROOT.TH2F("self.frame", "", 6, -3, 3, num, 0, num);
 
 
-        frame.Draw("");
+        self.frame.Draw("");
 
 
-        box = ROOT.TBox(-2, 0, 2, num);
-        box.SetFillColorAlpha(ROOT.kYellow - 9, 0.8);
-        box.Draw("same A");
+        self.box = ROOT.TBox(-2, 0, 2, num);
+        self.box.SetFillColorAlpha(ROOT.kYellow - 9, 0.8);
+        self.box.Draw("same A");
 
-        box_internal = ROOT.TBox(-1, 0, 1, num);
-        box_internal.SetFillColorAlpha(ROOT.kGray + 3 - 9, 0.5);
-        box_internal.Draw("same A");
+        self.box_internal = ROOT.TBox(-1, 0, 1, num);
+        self.box_internal.SetFillColorAlpha(ROOT.kGreen, 0.5);
+        self.box_internal.Draw("same A");
 
-        axis = ROOT.TGaxis(-3, num, 3, num,-3, 3, 510,"-");
-        xaxis = ROOT.TGaxis(3, 0, 3, num, 0, num, num ,"+S");
+        self.axis = ROOT.TGaxis(-3, num, 3, num,-3, 3, 510,"-");
+        self.xaxis = ROOT.TGaxis(3, 0, 3, num, 0, num, num ,"+S");
 
-        frame.GetYaxis().SetTickLength(0.);
-        xaxis.SetTickLength(0.);
+        self.frame.GetYaxis().SetTickLength(0.);
+        self.xaxis.SetTickLength(0.);
 
-        # // frame.Draw("X+");
+        # // self.frame.Draw("X+");
 
-        graph = ROOT.TGraph();
-        lines = []
-        right_ticks = []
-        left_ticks = []
+        self.graph = ROOT.TGraph();
+        self.lines = []
+        self.right_ticks = []
+        self.left_ticks = []
 
         # for (int i = 0; i < num; ++i)
         for i in range(num):
-            graph.SetPoint(i,  values[i], i + 0.5);
-            frame.GetYaxis().SetBinLabel(i + 1, names[i]);
+            self.graph.SetPoint(i,  values[i], i + 0.5);
+            self.frame.GetYaxis().SetBinLabel(i + 1, names[i]);
 
-            lines += [ROOT.TLine(values[i] - errors[i], i + 0.5, values[i] + errors[i], i + 0.5)]
-            lines[-1].SetLineColor(ROOT.kBlack);
-            lines[-1].SetLineWidth(2);
-            lines[-1].Draw();
+            self.lines += [ROOT.TLine(values[i] - errors[i], i + 0.5, values[i] + errors[i], i + 0.5)]
+            self.lines[-1].SetLineColor(ROOT.kBlack);
+            self.lines[-1].SetLineWidth(2);
+            self.lines[-1].Draw();
 
-            left_ticks += [ROOT.TLine(-3, i + 0.5, -2.95, i + 0.5)]
-            left_ticks[-1].SetLineColor(ROOT.kBlack);
-            left_ticks[-1].SetLineWidth(1);
-            left_ticks[-1].Draw();
+            self.left_ticks += [ROOT.TLine(-3, i + 0.5, -2.95, i + 0.5)]
+            self.left_ticks[-1].SetLineColor(ROOT.kBlack);
+            self.left_ticks[-1].SetLineWidth(1);
+            self.left_ticks[-1].Draw();
 
-            right_ticks += [ROOT.TLine(2.95, i + 0.5, 3, i + 0.5)]
-            right_ticks[-1].SetLineColor(ROOT.kBlack);
-            right_ticks[-1].SetLineWidth(1);
-            right_ticks[-1].Draw();
-
-
-        tl = ROOT.TLine(0, 0, 0, num);
-        tl.SetLineStyle(2);
-        tl.Draw();
+            self.right_ticks += [ROOT.TLine(2.95, i + 0.5, 3, i + 0.5)]
+            self.right_ticks[-1].SetLineColor(ROOT.kBlack);
+            self.right_ticks[-1].SetLineWidth(1);
+            self.right_ticks[-1].Draw();
 
 
-        graph.SetMarkerStyle(20);
-        graph.SetMarkerSize(1);
-        graph.SetMarkerColor(ROOT.kBlack);
+        self.tl = ROOT.TLine(0, 0, 0, num);
+        self.tl.SetLineStyle(2);
+        self.tl.Draw();
 
-        graph.Draw("P same");
 
-        frame.SetStats(0);
-        axis.SetLabelSize(0.0);
-        axis.Draw();
+        self.graph.SetMarkerStyle(20);
+        self.graph.SetMarkerSize(1);
+        self.graph.SetMarkerColor(ROOT.kBlack);
 
-        xaxis.SetLabelSize(0.0);
-        xaxis.Draw();
+        self.graph.Draw("P same");
+
+        self.frame.SetStats(0);
+        self.axis.SetLabelSize(0.0);
+        self.axis.Draw();
+
+        self.xaxis.SetLabelSize(0.0);
+        self.xaxis.Draw();
 
         ROOT.gPad.RedrawAxis(); 
 
-        c1.SaveAs(filename);
-        c1.Draw();
+        self.c1.SaveAs(filename);
+        self.c1.Draw();
 
     def DrawCorrelationMatrix(self, filename, result):
         final_parameters = result.floatParsFinal()
@@ -451,7 +451,7 @@ class Visualization:
 
         n = corr_matrix_before.GetNcols()
 
-        hh = ROOT.TH2D(name, name, number_of_inter_params, 0, number_of_inter_params, number_of_inter_params, 0, number_of_inter_params)
+        self.hh = ROOT.TH2D(name, name, number_of_inter_params, 0, number_of_inter_params, number_of_inter_params, 0, number_of_inter_params)
 
         internal_index = 0
         for i in range(n):
@@ -465,33 +465,33 @@ class Visualization:
                 par = final_parameters.at(j)
                 if "gamma" in par.GetName():
                     continue
-                hh.Fill(internal_index + 0.5, number_of_inter_params - internal__internal_index - 0.5, corr_matrix_before[i][j])
+                self.hh.Fill(internal_index + 0.5, number_of_inter_params - internal__internal_index - 0.5, corr_matrix_before[i][j])
                 internal__internal_index += 1    
 
             if par.GetName() == "tt_norm":
                 print(i)
 
-            hh.GetXaxis().SetBinLabel(internal_index + 1, final_parameters[i].GetName().split("alpha_")[-1])
-            hh.GetYaxis().SetBinLabel(number_of_inter_params - internal_index, final_parameters[i].GetName().split("alpha_")[-1])
+            self.hh.GetXaxis().SetBinLabel(internal_index + 1, final_parameters[i].GetName().split("alpha_")[-1])
+            self.hh.GetYaxis().SetBinLabel(number_of_inter_params - internal_index, final_parameters[i].GetName().split("alpha_")[-1])
             internal_index += 1
 
-        hh.SetMinimum(-1)
-        hh.SetMaximum(+1)
+        self.hh.SetMinimum(-1)
+        self.hh.SetMaximum(+1)
 
 
-        c = ROOT.TCanvas("c", "Canvas", number_of_inter_params * 100, number_of_inter_params * 60)
-        hh.Draw("COLZ")
-        hh.SetStats(0)
+        self.c = ROOT.TCanvas("self.c", "Canvas", number_of_inter_params * 100, number_of_inter_params * 60)
+        self.hh.Draw("COLZ")
+        self.hh.SetStats(0)
 
         ROOT.gStyle.SetPalette(87)
-        palette = hh.GetListOfFunctions().FindObject("palette")
+        palette = self.hh.GetListOfFunctions().FindObject("palette")
         if palette:
             palette.SetX1NDC(0.1)  # Adjust palette position
             palette.SetX2NDC(0.3)  # Adjust palette position
 
         # Show the canvas
-        c.SaveAs(filename);
-        c.Draw()
+        self.c.SaveAs(filename);
+        self.c.Draw()
 
 
         
@@ -706,6 +706,10 @@ class DrawModel:
         return yields, yields_uncert, sample_values
     
     def Draw(self, result, no_fit = False):
+        self.boxes = []
+        self.error_boxes = []
+        self.error_boxes_prefit = []
+        self.data_plots = []
         for channel in self.meas.GetChannels():
             channel_pdf = self.ws[str(channel.GetName()) + "_model"]
             obs_var = self.ws["obs_x_" + str(channel.GetName())]
@@ -725,7 +729,6 @@ class DrawModel:
             pad2_bottom.Draw()
             pad1_upper.cd()
 
-            boxes = []
 
 
             prefit_yields, prefit_unc, prefit_sample_values = self.get_yields(obs_var, observables, channel_pdf, result, True)
@@ -767,38 +770,37 @@ class DrawModel:
                 if up_value > maximum_y_val:
                     maximum_y_val = up_value
 
-                boxes += [ROOT.TBox(leftEdge, down_value, rightEdge, up_value)]
-                boxes[-1].SetFillStyle(3004)
-                boxes[-1].SetFillColor(ROOT.kGray + 3)
-                boxes[-1].Draw("same")
+                self.boxes += [ROOT.TBox(leftEdge, down_value, rightEdge, up_value)]
+                self.boxes[-1].SetFillStyle(3004)
+                self.boxes[-1].SetFillColor(ROOT.kGray + 3)
+                self.boxes[-1].Draw("same")
 
             self.hs_stacks[-1].SetMaximum(1.1 * maximum_y_val)
 
-            data_histogram = channel.GetData().GetHisto()
-            data_histogram.SetStats(0)
-            data_histogram.SetMarkerStyle(3)
-            data_histogram.SetMarkerSize(0.5)
+            self.data_histogram = channel.GetData().GetHisto()
+            self.data_histogram.SetStats(0)
+            self.data_histogram.SetMarkerStyle(3)
+            self.data_histogram.SetMarkerSize(0.5)
 
-            data_plot = ROOT.TGraph()
-            for i in range(data_histogram.GetNbinsX()):
-                data_plot.SetPoint(i, data_histogram.GetBinCenter(i + 1), data_histogram.GetBinContent(i + 1))
+            self.data_plots += [ROOT.TGraph()]
+            for i in range(self.data_histogram.GetNbinsX()):
+                self.data_plots[-1].SetPoint(i, self.data_histogram.GetBinCenter(i + 1), self.data_histogram.GetBinContent(i + 1))
 
-            data_plot.SetMarkerStyle(8)
-            data_plot.SetMarkerSize(0.5)
-            data_plot.Draw("same p")
+            self.data_plots[-1].SetMarkerStyle(8)
+            self.data_plots[-1].SetMarkerSize(0.5)
+            self.data_plots[-1].Draw("same p")
 
 
             pad1_bottom.cd()
-            number_of_bins = data_histogram.GetNbinsX()
+            number_of_bins = self.data_histogram.GetNbinsX()
             self.bias_graphs += [ROOT.TGraph(number_of_bins)]
             self.bias_graphs[-1].SetTitle("")
             self.bias_graphs[-1].SetMarkerSize(0.4)
             self.bias_graphs[-1].SetMarkerStyle(8)
             
-            error_boxes_prefit = []
             for i in range(1, number_of_bins + 1):
                 original_value = original_sample_bin_values[i - 1]
-                data_value = data_histogram.GetBinContent(i)
+                data_value = self.data_histogram.GetBinContent(i)
                 unc = prefit_unc[i - 1]
                 up_value = 1 + unc / (original_value)
                 down_value = 1 - unc / (original_value)
@@ -808,25 +810,26 @@ class DrawModel:
                 if up_value > 1.5:
                     up_value = 1.5
 
-                leftEdge = data_histogram.GetBinLowEdge(i)
-                binWidth = data_histogram.GetBinWidth(i)
+                leftEdge = self.data_histogram.GetBinLowEdge(i)
+                binWidth = self.data_histogram.GetBinWidth(i)
                 rightEdge = leftEdge + binWidth
 
-                self.bias_graphs[-1].SetPoint(i - 1, data_histogram.GetBinCenter(i),  data_value / original_value)
-                error_boxes_prefit += [ROOT.TBox(leftEdge, down_value, rightEdge, up_value)]
+                self.bias_graphs[-1].SetPoint(i - 1, self.data_histogram.GetBinCenter(i),  data_value / original_value)
+                self.error_boxes_prefit += [ROOT.TBox(leftEdge, down_value, rightEdge, up_value)]
 
                 # print(leftEdge, down_value, rightEdge, up_value)
 
-                error_boxes_prefit[-1].SetFillStyle(3004)
-                error_boxes_prefit[-1].SetFillColor(ROOT.kGray + 3)
+                self.error_boxes_prefit[-1].SetFillStyle(3004)
+                self.error_boxes_prefit[-1].SetFillColor(ROOT.kGray + 3)
+                self.error_boxes_prefit[-1].Draw("same")
 
             self.bias_graphs[-1].Draw("AP")
 
-            for box in error_boxes_prefit:
-                box.Draw("same")
+            # for box in self.error_boxes_prefit:
+                # box.Draw("same")
 
-            minimal_bin_value = data_histogram.GetBinLowEdge(1)
-            maximum_bin_value = data_histogram.GetBinLowEdge(number_of_bins) + data_histogram.GetBinWidth(number_of_bins)
+            minimal_bin_value = self.data_histogram.GetBinLowEdge(1)
+            maximum_bin_value = self.data_histogram.GetBinLowEdge(number_of_bins) + self.data_histogram.GetBinWidth(number_of_bins)
 
 
             self.bias_graphs[-1].GetYaxis().SetRangeUser(0.5, 1.5)
@@ -877,13 +880,13 @@ class DrawModel:
                 down_value = central_value - unc
                 up_value = central_value + unc
 
-                boxes += [ROOT.TBox(leftEdge, down_value, rightEdge, up_value)]
-                boxes[-1].SetFillStyle(3004)
-                boxes[-1].SetFillColor(ROOT.kGray + 3)
-                boxes[-1].Draw("same")
+                self.boxes += [ROOT.TBox(leftEdge, down_value, rightEdge, up_value)]
+                self.boxes[-1].SetFillStyle(3004)
+                self.boxes[-1].SetFillColor(ROOT.kGray + 3)
+                self.boxes[-1].Draw("same")
 
 
-            data_plot.Draw("same p")
+            self.data_plots[-1].Draw("same p")
 
             self.bias_second_graphs += [ROOT.TGraph(number_of_bins)]
             self.bias_second_graphs[-1].SetTitle("")
@@ -894,32 +897,31 @@ class DrawModel:
 
             pad2_bottom.cd()
 
-            error_boxes = []
             for i in range(1, number_of_bins + 1):
                 original_value = postfit_yields[i - 1]
-                data_value = data_histogram.GetBinContent(i)
+                data_value = self.data_histogram.GetBinContent(i)
                 unc = postfit_yields_uncert[i - 1]
                 up_value = 1 + unc / (original_value)
                 down_value = 1 - unc / (original_value)
 
-                leftEdge = data_histogram.GetBinLowEdge(i)
-                binWidth = data_histogram.GetBinWidth(i)
+                leftEdge = self.data_histogram.GetBinLowEdge(i)
+                binWidth = self.data_histogram.GetBinWidth(i)
                 rightEdge = leftEdge + binWidth
 
-                self.bias_second_graphs[-1].SetPoint(i - 1, data_histogram.GetBinCenter(i),  data_value / original_value)
-                error_boxes += [ROOT.TBox(leftEdge, down_value, rightEdge, up_value)]
-                error_boxes[-1].SetFillStyle(3004)
-                error_boxes[-1].SetFillColor(ROOT.kGray + 3)
-                # error_boxes[-1].Draw("same")
+                self.bias_second_graphs[-1].SetPoint(i - 1, self.data_histogram.GetBinCenter(i),  data_value / original_value)
+                self.error_boxes += [ROOT.TBox(leftEdge, down_value, rightEdge, up_value)]
+                self.error_boxes[-1].SetFillStyle(3004)
+                self.error_boxes[-1].SetFillColor(ROOT.kGray + 3)
+                # self.error_boxes[-1].Draw("same")
             
 
             self.bias_second_graphs[-1].Draw("AP")
 
-            for box in error_boxes:
+            for box in self.error_boxes:
                 box.Draw("same")
             
-            minimal_bin_value = data_histogram.GetBinLowEdge(1)
-            maximum_bin_value = data_histogram.GetBinLowEdge(number_of_bins) + data_histogram.GetBinWidth(number_of_bins)
+            minimal_bin_value = self.data_histogram.GetBinLowEdge(1)
+            maximum_bin_value = self.data_histogram.GetBinLowEdge(number_of_bins) + self.data_histogram.GetBinWidth(number_of_bins)
 
 
             self.bias_second_graphs[-1].GetYaxis().SetRangeUser(0.5, 1.5)
