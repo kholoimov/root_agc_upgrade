@@ -815,15 +815,30 @@ class DrawModel:
                 rightEdge = leftEdge + binWidth
 
                 self.bias_graphs[-1].SetPoint(i - 1, self.data_histogram.GetBinCenter(i),  data_value / original_value)
+
+            self.bias_graphs[-1].Draw("AP")
+            
+            for i in range(1, number_of_bins + 1):
+                original_value = original_sample_bin_values[i - 1]
+                data_value = self.data_histogram.GetBinContent(i)
+                unc = prefit_unc[i - 1]
+                up_value = 1 + unc / (original_value)
+                down_value = 1 - unc / (original_value)
+
+                if down_value < 0.5:
+                    down_value = 0.5
+                if up_value > 1.5:
+                    up_value = 1.5
+
+                leftEdge = self.data_histogram.GetBinLowEdge(i)
+                binWidth = self.data_histogram.GetBinWidth(i)
+                rightEdge = leftEdge + binWidth
+
                 self.error_boxes_prefit += [ROOT.TBox(leftEdge, down_value, rightEdge, up_value)]
-
-                # print(leftEdge, down_value, rightEdge, up_value)
-
                 self.error_boxes_prefit[-1].SetFillStyle(3004)
                 self.error_boxes_prefit[-1].SetFillColor(ROOT.kGray + 3)
                 self.error_boxes_prefit[-1].Draw("same")
 
-            self.bias_graphs[-1].Draw("AP")
 
             # for box in self.error_boxes_prefit:
                 # box.Draw("same")
@@ -909,16 +924,26 @@ class DrawModel:
                 rightEdge = leftEdge + binWidth
 
                 self.bias_second_graphs[-1].SetPoint(i - 1, self.data_histogram.GetBinCenter(i),  data_value / original_value)
-                self.error_boxes += [ROOT.TBox(leftEdge, down_value, rightEdge, up_value)]
-                self.error_boxes[-1].SetFillStyle(3004)
-                self.error_boxes[-1].SetFillColor(ROOT.kGray + 3)
-                # self.error_boxes[-1].Draw("same")
-            
 
             self.bias_second_graphs[-1].Draw("AP")
 
-            for box in self.error_boxes:
-                box.Draw("same")
+            for i in range(1, number_of_bins + 1):
+                original_value = postfit_yields[i - 1]
+                data_value = self.data_histogram.GetBinContent(i)
+                unc = postfit_yields_uncert[i - 1]
+                up_value = 1 + unc / (original_value)
+                down_value = 1 - unc / (original_value)
+
+                leftEdge = self.data_histogram.GetBinLowEdge(i)
+                binWidth = self.data_histogram.GetBinWidth(i)
+                rightEdge = leftEdge + binWidth
+
+                self.error_boxes += [ROOT.TBox(leftEdge, down_value, rightEdge, up_value)]
+                self.error_boxes[-1].SetFillStyle(3004)
+                self.error_boxes[-1].SetFillColor(ROOT.kGray + 3)
+                self.error_boxes[-1].Draw("same")
+            
+
             
             minimal_bin_value = self.data_histogram.GetBinLowEdge(1)
             maximum_bin_value = self.data_histogram.GetBinLowEdge(number_of_bins) + self.data_histogram.GetBinWidth(number_of_bins)
