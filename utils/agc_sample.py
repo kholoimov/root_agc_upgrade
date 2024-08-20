@@ -73,7 +73,7 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
 
 
 
-    def AddNormPlusShapeHistoSys(self, name, histoname_up = None, histofile_up = None, histopath_up = "", # check more here:
+    def AddNormPlusShapeHistoSys(self, name, histoname_up = None, histofile_up = None, histopath_up = "", # check more here: https://github.com/scikit-hep/cabinetry/issues/26
                                  histoname_down = None, histofile_down = None, histopath_down = ""):
         if histofile_up is None:
             histofile_up = self.fInputFile
@@ -90,7 +90,7 @@ class AGC_Sample(ROOT.RooStats.HistFactory.Sample):
         """
         first symmertrize histogram -> calculate overallsys -> save all to sample
         check more here:
-
+        https://github.com/scikit-hep/cabinetry/issues/26
         """
         channel_name = str(histoname.split("_")[0])
 
