@@ -12,7 +12,7 @@ class Visualization:
             name = var.GetName();
             if ("alpha" in name):
                 if (fWorkspace.var(name).getVal() == 0): continue
-                names += [name];
+                names += [name.split("alpha_")[-1]];
                 values += [fWorkspace.var(name).getVal()]
                 errors += [fWorkspace.var(name).getError()]
 
@@ -42,6 +42,8 @@ class Visualization:
         self.lines = []
         self.right_ticks = []
         self.left_ticks = []
+
+        self.frame.GetYaxis().SetLabelSize(0.04)
 
         for i in range(num):
             self.graph.SetPoint(i,  values[i], i + 0.5);
@@ -413,6 +415,7 @@ class DrawModel:
             channel_name = "_".join(channel.GetName().split("_")[1:])
             self.hs_stacks[-1].SetTitle(channel_name + " PREFIT")
             self.hs_stacks[-1].Draw("hist")
+            self.hs_stacks[-1].GetXaxis().SetLabelSize(0.06)
 
             maximum_y_val = ROOT.gPad.GetUymax() # used for moving upper limit of Y ax
 
@@ -464,6 +467,8 @@ class DrawModel:
                 self.bias_graphs[-1].SetPoint(i - 1, self.data_histogram.GetBinCenter(i),  data_value / original_value) 
 
             self.bias_graphs[-1].Draw("AP")
+            self.bias_graphs[-1].GetXaxis().SetLabelSize(0.12)
+            self.bias_graphs[-1].GetYaxis().SetLabelSize(0.08)
             
             for i in range(1, number_of_bins + 1):
                 original_value = original_sample_bin_values[i - 1]
@@ -521,6 +526,7 @@ class DrawModel:
             channel_name = "_".join(channel.GetName().split("_")[1:])
             self.second_hs_stacks[-1].SetTitle(channel_name + " POSTFIT")
             self.second_hs_stacks[-1].Draw("hist")
+            self.second_hs_stacks[-1].GetXaxis().SetLabelSize(0.06)
             self.second_hs_stacks[-1].SetMaximum(1.1 * maximum_y_val)
 
             bin_index = 1
@@ -555,6 +561,8 @@ class DrawModel:
                 self.bias_second_graphs[-1].SetPoint(i - 1, self.data_histogram.GetBinCenter(i),  data_value / original_value)
 
             self.bias_second_graphs[-1].Draw("AP")
+            self.bias_second_graphs[-1].GetXaxis().SetLabelSize(0.12)
+            self.bias_second_graphs[-1].GetYaxis().SetLabelSize(0.08)
 
             for i in range(1, number_of_bins + 1):
                 original_value = postfit_yields[i - 1]
