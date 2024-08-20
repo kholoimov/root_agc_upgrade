@@ -1,4 +1,6 @@
-# ROOT AGC Update
+# Statistical treatment of the Analysis Grand Challenge results with Root HistFactory and RooFit.
 
-### How to run:
-`additional_validation_histograms.ipynb` can be used after running `main.ipynb`, since result file is required to run notebook.
+The official AGC documentation can be found [at this link](https://agc.readthedocs.io/en/latest/index.html).
+
+# How to run:
+`main.ipynb` - main workflow notebook, which implement histograms combining and fitting the statistical model. Fitting results are saved to fitResults.root and can be used in `additional_validation_histograms.ipynb` for validation using extra observables.
