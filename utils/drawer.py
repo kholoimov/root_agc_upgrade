@@ -446,9 +446,10 @@ class DrawModel:
             self.data_histogram.SetMarkerStyle(3) # stylization
             self.data_histogram.SetMarkerSize(0.5)
 
-            self.data_plots += [ROOT.TGraph()]
+            self.data_plots += [ROOT.TGraphErrors()]
             for i in range(self.data_histogram.GetNbinsX()):
                 self.data_plots[-1].SetPoint(i, self.data_histogram.GetBinCenter(i + 1), self.data_histogram.GetBinContent(i + 1)) 
+                self.data_plots[-1].SetPointError(i, 0, self.data_histogram.GetBinError(i + 1) / 2) 
 
             self.data_plots[-1].SetMarkerStyle(8)
             self.data_plots[-1].SetMarkerSize(0.5)
@@ -456,7 +457,7 @@ class DrawModel:
 
             pad1_bottom.cd()
             number_of_bins = self.data_histogram.GetNbinsX()
-            self.bias_graphs += [ROOT.TGraph(number_of_bins)] # TGraph which will be use to save data/bin_value data
+            self.bias_graphs += [ROOT.TGraphErrors(number_of_bins)] # TGraph which will be use to save data/bin_value data
             self.bias_graphs[-1].SetTitle("")
             self.bias_graphs[-1].SetMarkerSize(0.4)
             self.bias_graphs[-1].SetMarkerStyle(8)
@@ -464,7 +465,9 @@ class DrawModel:
             for i in range(1, number_of_bins + 1): 
                 original_value = original_sample_bin_values[i - 1]
                 data_value = self.data_histogram.GetBinContent(i)
+                data_error = self.data_histogram.GetBinError(i) / 2
                 self.bias_graphs[-1].SetPoint(i - 1, self.data_histogram.GetBinCenter(i),  data_value / original_value) 
+                self.bias_graphs[-1].SetPointError(i - 1, 0, data_error / original_value) 
 
             self.bias_graphs[-1].Draw("AP")
             self.bias_graphs[-1].GetXaxis().SetLabelSize(0.12)
@@ -547,7 +550,7 @@ class DrawModel:
 
             self.data_plots[-1].Draw("same p")
 
-            self.bias_second_graphs += [ROOT.TGraph(number_of_bins)]
+            self.bias_second_graphs += [ROOT.TGraphErrors(number_of_bins)]
             self.bias_second_graphs[-1].SetTitle("")
             self.bias_second_graphs[-1].SetMarkerSize(0.4)
             self.bias_second_graphs[-1].SetMarkerStyle(8)
@@ -557,8 +560,10 @@ class DrawModel:
             for i in range(1, number_of_bins + 1):
                 original_value = postfit_yields[i - 1]
                 data_value = self.data_histogram.GetBinContent(i)
+                data_error = self.data_histogram.GetBinError(i) / 2
 
                 self.bias_second_graphs[-1].SetPoint(i - 1, self.data_histogram.GetBinCenter(i),  data_value / original_value)
+                self.bias_second_graphs[-1].SetPointError(i - 1, 0, data_error / original_value) 
 
             self.bias_second_graphs[-1].Draw("AP")
             self.bias_second_graphs[-1].GetXaxis().SetLabelSize(0.12)
